@@ -11,6 +11,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .modal-box { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col pb-12">
@@ -22,12 +23,12 @@
                 <i class="fa-solid fa-flag text-yellow-300 text-lg"></i>
                 <div>
                     <h1 class="font-bold text-sm md:text-base leading-tight uppercase">THCS-THPT TRẦN TRƯỜNG SINH</h1>
-                    <p class="text-[11px] text-red-100">Bảng Tổng Kết Thi Đua & Vi Phạm Tuần</p>
+                    <p class="text-[11px] text-red-100">Bảng Quản Lý Thi Đua Tuần</p>
                 </div>
             </div>
-            <span class="px-2.5 py-1 rounded bg-red-800 text-white text-xs font-bold flex items-center gap-1 shadow-sm">
-                <i class="fa-solid fa-eye"></i> Công Khai
-            </span>
+            <button id="lockStatusBtn" onclick="openAdminModal()" class="px-3 py-1 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-lock"></i> Đã Khóa
+            </button>
         </div>
     </header>
 
@@ -37,7 +38,7 @@
         <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-calendar-week text-red-600 text-lg"></i>
-                <span class="text-xs md:text-sm font-bold text-slate-700">Xem Thi Đua Theo Tuần:</span>
+                <span class="text-xs md:text-sm font-bold text-slate-700">Chọn Tuần Quản Lý:</span>
             </div>
             <select id="weekSelect" onchange="changeWeek()" class="bg-red-50 border border-red-300 font-bold text-xs md:text-sm text-red-700 rounded-lg px-3 py-1.5 focus:outline-none cursor-pointer">
                 <option value="Tuần 05">Tuần 05 (05/10 - 09/10)</option>
@@ -45,6 +46,11 @@
                 <option value="Tuần 07">Tuần 07 (19/10 - 23/10)</option>
             </select>
         </section>
+
+        <!-- BANNER KHÓA -->
+        <div id="lockBanner" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm">
+            <i class="fa-solid fa-lock mr-1.5 text-amber-600"></i><strong>Hệ thống đang khóa:</strong> Cần gõ mật khẩu Admin để mở quyền nhập lỗi.
+        </div>
 
         <!-- 2. KẾT QUẢ XẾP HẠNG PHÍA TRÊN -->
         <section class="space-y-2">
@@ -58,10 +64,10 @@
             </div>
         </section>
 
-        <!-- 3. DANH SÁCH LỚP (BẤM VÀO ĐỂ SỔ DANH SÁCH HỌC SINH) -->
+        <!-- 3. DANH SÁCH LỚP VÀ NÚT NHẬP LỖI -->
         <section class="space-y-3 pt-2">
             <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-users text-red-600"></i> Danh Sách Học Sinh & Vi Phạm Lớp
+                <i class="fa-solid fa-list-check text-red-600"></i> Danh Sách Lớp & Nhập Lỗi Vi Phạm
             </h2>
 
             <div id="classListContainer" class="space-y-3"></div>
@@ -69,7 +75,86 @@
 
     </main>
 
+    <!-- MODAL NHẬP LỖI HỌC SINH -->
+    <div id="inputModal" class="modal-box p-3">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between">
+                <h3 class="font-bold text-sm" id="modalTitle">Nhập Vi Phạm Lớp</h3>
+                <button onclick="closeInputModal()" class="text-white hover:text-slate-200 text-2xl font-bold leading-none">&times;</button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-4 flex-grow text-xs">
+                <!-- Đánh Giá Tập Thể -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">1. Đánh Giá Tập Thể</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Tiết học tốt (+10)</span>
+                            <input type="number" min="0" id="m_inp_tiet_tot" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Tiết B (-3)</span>
+                            <input type="number" min="0" id="m_inp_tiet_b" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Tiết C (-10)</span>
+                            <input type="number" min="0" id="m_inp_tiet_c" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Không đạt/đăng ký (-5)</span>
+                            <input type="number" min="0" id="m_inp_tiet_khong_dat" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nhập Lỗi Cá Nhân -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Mã Lỗi Cá Nhân Từng Bạn</h4>
+                    <p class="text-[11px] text-slate-500">Các mã lỗi cách nhau bởi <b>dấu gạch ngang "-"</b> (Ví dụ: <code class="bg-slate-100 px-1 font-bold text-red-600">14-15-27</code>)</p>
+                    <div id="modalStudentList" class="space-y-2 max-h-[250px] overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- Phạt Trễ SĐB -->
+                <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="m_inp_tre_sdb" class="w-4 h-4 text-red-600 rounded">
+                        <span class="font-bold text-rose-800">Nộp Sổ đầu bài sau 17h00 T6 (Phạt xếp cuối)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="p-3 border-t bg-slate-50 flex justify-end space-x-2">
+                <button onclick="closeInputModal()" class="px-3 py-1.5 rounded bg-slate-200 text-slate-700 font-bold text-xs">Hủy</button>
+                <button onclick="saveModalData()" class="px-4 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow">Lưu Kết Quả</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BẢO MẬT BTC -->
+    <div id="adminModal" class="modal-box p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 space-y-3">
+            <div class="flex items-center justify-between border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lock text-red-600"></i> Xác Nhận BTC
+                </h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            </div>
+            
+            <form onsubmit="handleAdminSubmit(event)" class="space-y-3">
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-700">Mật khẩu Admin mở khóa:</label>
+                    <input type="password" id="adminPassInput" placeholder="Nhập Khuon@247..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-red-600">
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition shadow">
+                    Mở Khóa Chỉnh Sửa
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
+        const ADMIN_PASS = "Khuon@247";
+
         const RULES = {
             1: { text: "Không thuộc bài/điểm kém", pts: -5 },
             2: { text: "Cúp tiết học", pts: -10 },
@@ -135,22 +220,27 @@
             ]
         };
 
-        // DỮ LIỆU VI PHẠM MẪU SẴN
+        let currentActiveEditClass = null;
+        let isUnlocked = false;
+
+        // XÓA HẾT MỌI LỖI MẪU CŨ, KHỞI TẠO DỮ LIỆU TRỐNG
         let appState = {
             currentWeek: "Tuần 05",
-            data: {
-                "Tuần 05": {
-                    "10A1": { tiet_tot: 2, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: { "Trần Gia Bảo": "14 15", "Phan Trần Phúc Đạt": "13" } },
-                    "10A2": { tiet_tot: 0, tiet_b: 1, tiet_c: 0, tiet_kd: 0, late: false, violations: { "Võ Quốc Hào": "1" } },
-                    "10A3": { tiet_tot: 1, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} }
-                }
-            }
+            data: {}
         };
 
         window.onload = function() {
-            document.getElementById('weekSelect').value = "Tuần 05";
+            const saved = localStorage.getItem('TTS_CLEAN_V5');
+            if (saved) {
+                try { appState = JSON.parse(saved); } catch(e) {}
+            }
+            document.getElementById('weekSelect').value = appState.currentWeek || "Tuần 05";
             renderAll();
         };
+
+        function saveState() {
+            localStorage.setItem('TTS_CLEAN_V5', JSON.stringify(appState));
+        }
 
         function changeWeek() {
             appState.currentWeek = document.getElementById('weekSelect').value;
@@ -159,10 +249,13 @@
 
         function renderAll() {
             document.getElementById('lblWeekRank').innerText = appState.currentWeek;
+            document.getElementById('lockStatusBtn').innerHTML = isUnlocked ? '<i class="fa-solid fa-lock-open"></i> Đã Mở Khóa' : '<i class="fa-solid fa-lock"></i> Đã Khóa';
+            document.getElementById('lockBanner').style.display = isUnlocked ? 'none' : 'block';
             renderRankings();
             renderClassListWithViolations();
         }
 
+        // BÁM SÁT CÁCH TÁC PHÂN TÁCH BẰNG DẤU GẠCH NGANG "-"
         function calculateClassScore(clsData) {
             if (!clsData) return 100;
             let score = 100;
@@ -174,7 +267,8 @@
             if (clsData.violations) {
                 Object.values(clsData.violations).forEach(codesStr => {
                     if (codesStr && typeof codesStr === 'string') {
-                        codesStr.trim().split(/\s+/).forEach(c => {
+                        codesStr.trim().split(/-+/).forEach(c => {
+                            c = c.trim();
                             if (RULES[c]) score += RULES[c].pts;
                         });
                     }
@@ -242,13 +336,16 @@
                 const violationsMap = clsInfo.violations || {};
 
                 let studentListHTML = '';
+                let hasAnyViolationInClass = false;
 
                 students.forEach((st, idx) => {
                     const codes = violationsMap[st];
                     let violationBadge = '';
 
                     if (codes && typeof codes === 'string' && codes.trim() !== '') {
-                        violationBadge = codes.trim().split(/\s+/).map(c => {
+                        hasAnyViolationInClass = true;
+                        violationBadge = codes.trim().split(/-+/).map(c => {
+                            c = c.trim();
                             return RULES[c] ? `<span class="bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded text-[10px] ml-1">[Mã ${c}] ${RULES[c].text} (${RULES[c].pts}đ)</span>` : `<span class="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-[10px] ml-1">[Mã ${c}]</span>`;
                         }).join(' ');
                     }
@@ -263,20 +360,19 @@
 
                 html += `
                     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        <!-- NÚT BẤM VÀO TÊN LỚP ĐỂ XEM DANH SÁCH -->
-                        <div onclick="toggleStudentList('${cls}')" class="p-3.5 bg-white hover:bg-slate-50 cursor-pointer flex items-center justify-between border-b select-none">
-                            <div class="flex items-center space-x-2">
+                        <div class="p-3.5 bg-white flex items-center justify-between border-b">
+                            <div onclick="toggleStudentList('${cls}')" class="flex items-center space-x-2 cursor-pointer select-none">
                                 <span class="font-bold text-sm text-slate-800">Lớp ${cls}</span>
                                 <span class="text-xs font-bold px-2 py-0.5 rounded ${score < 0 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${score} điểm</span>
-                                <span class="text-[11px] text-slate-500">(${students.length} HS)</span>
+                                ${clsInfo.late ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">Nộp trễ SĐB</span>' : ''}
+                                <i id="icon_${cls}" class="fa-solid fa-chevron-down text-slate-400 text-xs ml-1"></i>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs font-bold text-red-600">Bấm xem danh sách</span>
-                                <i id="icon_${cls}" class="fa-solid fa-chevron-down text-slate-400"></i>
-                            </div>
+
+                            <button type="button" onclick="openInputModal('${cls}')" class="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition flex items-center gap-1 shadow-sm cursor-pointer">
+                                <i class="fa-solid fa-pen-to-square"></i> Nhập Lỗi
+                            </button>
                         </div>
 
-                        <!-- KHU VỰC CHỨA DANH SÁCH CÁC BẠN (MẶC ĐỊNH ẨN, BẤM VÀO SẼ HIỆN) -->
                         <div id="studentList_${cls}" style="display: none;" class="p-3 bg-slate-50 space-y-1 max-h-[350px] overflow-y-auto">
                             ${studentListHTML}
                         </div>
@@ -285,6 +381,120 @@
             });
 
             container.innerHTML = html;
+        }
+
+        function openInputModal(cls) {
+            if (!isUnlocked) {
+                alert("Hệ thống đang khóa! Vui lòng nhập mật khẩu Admin để mở khóa.");
+                openAdminModal();
+                return;
+            }
+
+            currentActiveEditClass = cls;
+            document.getElementById('modalTitle').innerText = `Nhập Vi Phạm - Lớp ${cls} (${appState.currentWeek})`;
+
+            const weekData = appState.data[appState.currentWeek] || {};
+            const clsInfo = weekData[cls] || { tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} };
+
+            document.getElementById('m_inp_tiet_tot').value = clsInfo.tiet_tot || 0;
+            document.getElementById('m_inp_tiet_b').value = clsInfo.tiet_b || 0;
+            document.getElementById('m_inp_tiet_c').value = clsInfo.tiet_c || 0;
+            document.getElementById('m_inp_tiet_kd').value = clsInfo.tiet_kd || 0;
+            document.getElementById('m_inp_tre_sdb').checked = !!clsInfo.late;
+
+            const students = CLASS_STUDENTS[cls] || [];
+            const container = document.getElementById('modalStudentList');
+
+            container.innerHTML = students.map((st, i) => {
+                const val = (clsInfo.violations && clsInfo.violations[st]) ? clsInfo.violations[st] : '';
+                return `
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-700">${st}</span>
+                            <span id="m_st_desc_${i}" class="text-[10px] text-red-600 font-medium italic"></span>
+                        </div>
+                        <input type="text" id="m_st_code_${i}" value="${val}" oninput="parseModalStudentCode(${i})" placeholder="Ví dụ: 14-15-27" class="w-full border rounded px-2 py-1 text-xs font-bold uppercase text-slate-800">
+                    </div>
+                `;
+            }).join('');
+
+            students.forEach((_, i) => parseModalStudentCode(i));
+            document.getElementById('inputModal').style.display = 'flex';
+        }
+
+        // TÁCH MÃ BẰNG DẤU GẠCH NGANG "-"
+        function parseModalStudentCode(index) {
+            const el = document.getElementById(`m_st_code_${index}`);
+            if (!el) return;
+            const val = el.value.trim();
+            const descEl = document.getElementById(`m_st_desc_${index}`);
+            if (!val) { descEl.innerText = ""; return; }
+
+            const codes = val.split(/-+/);
+            let parsedText = [];
+            codes.forEach(c => {
+                c = c.trim();
+                if (RULES[c]) parsedText.push(RULES[c].text);
+            });
+            descEl.innerText = parsedText.length > 0 ? parsedText.join(", ") : "Mã không có";
+        }
+
+        function closeInputModal() {
+            document.getElementById('inputModal').style.display = 'none';
+        }
+
+        function saveModalData() {
+            if (!currentActiveEditClass) return;
+            const cls = currentActiveEditClass;
+
+            if (!appState.data[appState.currentWeek]) appState.data[appState.currentWeek] = {};
+
+            const students = CLASS_STUDENTS[cls] || [];
+            let violationsMap = {};
+
+            students.forEach((st, i) => {
+                const inputEl = document.getElementById(`m_st_code_${i}`);
+                if (inputEl) {
+                    const val = inputEl.value.trim();
+                    if (val) violationsMap[st] = val;
+                }
+            });
+
+            appState.data[appState.currentWeek][cls] = {
+                tiet_tot: parseInt(document.getElementById('m_inp_tiet_tot').value) || 0,
+                tiet_b: parseInt(document.getElementById('m_inp_tiet_b').value) || 0,
+                tiet_c: parseInt(document.getElementById('m_inp_tiet_c').value) || 0,
+                tiet_kd: parseInt(document.getElementById('m_inp_tiet_kd').value) || 0,
+                late: document.getElementById('m_inp_tre_sdb').checked,
+                violations: violationsMap
+            };
+
+            saveState();
+            renderAll();
+            closeInputModal();
+            alert(`Đã lưu dữ liệu Lớp ${cls} thành công!`);
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function handleAdminSubmit(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('adminPassInput').value.trim();
+            if (inputPass === ADMIN_PASS) {
+                isUnlocked = true;
+                renderAll();
+                closeAdminModal();
+            } else {
+                alert("Mật khẩu Admin không chính xác!");
+            }
         }
     </script>
 </body>
