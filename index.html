@@ -33,7 +33,7 @@
 
     <main class="max-w-4xl w-full mx-auto p-3 space-y-5 flex-grow">
 
-        <!-- 1. MỤC CHỌN TUẦN -->
+        <!-- 1. CHỌN TUẦN -->
         <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-calendar-week text-red-600 text-lg"></i>
@@ -47,8 +47,8 @@
         </section>
 
         <!-- BANNER KHÓA -->
-        <div id="lockBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm">
-            <i class="fa-solid fa-lock mr-1"></i> <strong>Hệ thống đang khóa:</strong> BTC đã khóa quyền nhập liệu. Cần nhập mật khẩu Admin để chỉnh sửa.
+        <div id="lockBanner" style="display: none;" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm">
+            <i class="fa-solid fa-lock mr-1"></i> <strong>Hệ thống đang khóa:</strong> BTC đã khóa quyền nhập liệu.
         </div>
 
         <!-- 2. KẾT QUẢ XẾP HẠNG PHÍA TRÊN -->
@@ -58,19 +58,14 @@
             </h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <!-- Group 1 -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="bg-blue-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 1 (Khối 10, 11, 12)</div>
                     <div id="group1-list" class="divide-y divide-slate-100"></div>
                 </div>
-
-                <!-- Group 2 -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="bg-emerald-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 2 (Khối 10, 11, 12)</div>
                     <div id="group2-list" class="divide-y divide-slate-100"></div>
                 </div>
-
-                <!-- Group 3 -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="bg-purple-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 3 (Khối 10, 11, 12)</div>
                     <div id="group3-list" class="divide-y divide-slate-100"></div>
@@ -84,18 +79,17 @@
                 <i class="fa-solid fa-list-check text-red-600"></i> Chi Tiết Nhập Điểm & Vi Phạm Theo Lớp
             </h2>
 
-            <!-- DANH SÁCH LỚP -->
             <div id="classListContainer" class="space-y-3"></div>
         </section>
 
     </main>
 
     <!-- MODAL NHẬP LỖI HỌC SINH -->
-    <div id="inputModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center hidden p-3">
+    <div id="inputModal" style="display: none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center p-3">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between">
                 <h3 class="font-bold text-sm" id="modalTitle">Nhập Vi Phạm Lớp</h3>
-                <button onclick="closeInputModal()" class="text-white hover:text-slate-200 text-xl font-bold">&times;</button>
+                <button onclick="closeInputModal()" class="text-white hover:text-slate-200 text-2xl font-bold line-none">&times;</button>
             </div>
 
             <div class="p-4 overflow-y-auto space-y-4 flex-grow text-xs">
@@ -122,18 +116,18 @@
                     </div>
                 </div>
 
-                <!-- Nhập Lỗi Cá Nhân -->
+                <!-- Nhập Lỗi Cá Nhân Từng Bạn -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Mã Lỗi Cá Nhân Học Sinh</h4>
                     <p class="text-[11px] text-slate-500">Nhập mã lỗi cách nhau bằng khoảng trắng (Ví dụ: <code class="bg-slate-100 px-1 font-bold text-red-600">14 15 27</code>)</p>
-                    <div id="modalStudentList" class="space-y-2"></div>
+                    <div id="modalStudentList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
                 </div>
 
                 <!-- Phạt Trễ SĐB -->
                 <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
                     <label class="flex items-center space-x-2 cursor-pointer">
                         <input type="checkbox" id="m_inp_tre_sdb" class="w-4 h-4 text-red-600 rounded">
-                        <span class="font-bold text-rose-800">Nộp Sổ đầu bài sau 17h00 T6 (Xếp hạng cuối)</span>
+                        <span class="font-bold text-rose-800">Nộp Sổ đầu bài sau 17h00 T6 (Phạt xếp cuối)</span>
                     </label>
                 </div>
             </div>
@@ -145,12 +139,12 @@
         </div>
     </div>
 
-    <!-- MODAL BTC KHÓA & BẢO MẬT MẬT KHẨU -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 items-center justify-center hidden p-4">
+    <!-- MODAL BTC KHÓA -->
+    <div id="adminModal" style="display: none;" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 space-y-3">
             <h3 class="font-bold text-sm text-slate-800 border-b pb-2 flex items-center justify-between">
                 <span>Quản Trị BTC</span>
-                <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600">&times;</button>
+                <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
             </h3>
             
             <div id="adminPassArea" class="space-y-2">
@@ -159,9 +153,9 @@
                 <button onclick="verifyAdminPass()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs">Xác Nhận Mật Khẩu</button>
             </div>
 
-            <div id="adminControlArea" class="hidden space-y-3">
+            <div id="adminControlArea" style="display: none;" class="space-y-3">
                 <div class="p-2 bg-emerald-50 border border-emerald-200 rounded text-[11px] text-emerald-700 font-bold">
-                    <i class="fa-solid fa-circle-check mr-1"></i> Đã xác thực quyền Admin thành công!
+                    <i class="fa-solid fa-circle-check mr-1"></i> Đã đăng nhập Admin!
                 </div>
                 <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border cursor-pointer">
                     <span class="text-xs font-bold text-slate-700">Khóa nhập liệu tuần này</span>
@@ -174,7 +168,7 @@
 
     <!-- SCRIPT TÍNH TOÁN & HIỂN THỊ -->
     <script>
-        const ADMIN_PASS = "Khuon@247"; // Mật khẩu Admin mở khóa
+        const ADMIN_PASS = "Khuon@247"; // Mật khẩu Admin Mở Khóa
 
         const RULES = {
             1: { text: "Không thuộc bài/điểm kém", pts: -5 },
@@ -207,8 +201,19 @@
             3: ["10A4", "10A5", "10A6", "10A7", "11A1", "11A2"]
         };
 
+        // DANH SÁCH 45 HỌC SINH CHUẨN 100% CỦA LỚP 10A1
         const CLASS_STUDENTS = {
-            "10A1": ["Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Phan Trần Phúc Đạt", "Nguyễn Nhựt Huy"],
+            "10A1": [
+                "Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Nguyễn Lê Thùy Dương", "Phan Trần Phúc Đạt",
+                "Bùi Trần Hoàng Giang", "Nguyễn Thị Ngọc Hân", "Hà Huy Hoàng", "Nguyễn Nhựt Huy", "Lê Nguyễn Gia Hưng",
+                "Phạm Nhật Khang", "Phạm Huỳnh Như Khánh", "Nguyễn Trần Yến Lam", "Bùi Thị Thùy Lan", "Đỗ Pha Lê",
+                "Phan Thành Lợi", "Bùi Thị Trà My", "Nguyễn Thị Bảo Ngân", "Nguyễn Thị Thảo Ngân", "Nguyễn Gia Nghi",
+                "Nguyễn Khánh Ngọc", "Võ Thị Khánh Ngọc", "Nguyễn Thị Thảo Nguyên", "Tống Hoài Nhân", "Hồ Phúc Nhân",
+                "Lê Ngọc Như", "Nguyễn Tấn Phát", "Nguyễn Ngọc Bảo Quân", "Phan Đỗ Quyên", "Lê Hoàng Sang",
+                "Hồ Thị Mỹ Tâm", "Võ Diễm Thi", "Phạm Thị Kim Thùy", "Nguyễn Ngọc Anh Thư", "Hồ Ngọc Bảo Trâm",
+                "Nguyễn Trần Huyền Trân", "Đỗ Duy Tường", "Lê Vĩnh Tường", "Phan Như Uyên", "Hồ Quốc Việt",
+                "Võ Thị Kha Vy", "Bùi Minh Vy", "Phan Thị Lan Vy", "Nguyễn Trần Như Ý", "Đào Phi Yến"
+            ],
             "10A2": ["Đặng Văn Hùng", "Lê Thị Mai", "Trần Văn Nam", "Phạm Thị Hoa"],
             "10A3": ["Nguyễn Văn Bình", "Lê Văn Cường", "Phạm Minh Đức"],
             "10A4": ["Vũ Hoàng Anh", "Đỗ Kim Ngân", "Trịnh Quốc Việt"],
@@ -260,7 +265,7 @@
         function renderAll() {
             document.getElementById('lblWeekRank').innerText = appState.currentWeek;
             document.getElementById('lockBadgeText').innerText = appState.isLocked ? "Đã Khóa" : "Đang Mở";
-            document.getElementById('lockBanner').classList.toggle('hidden', !appState.isLocked);
+            document.getElementById('lockBanner').style.display = appState.isLocked ? 'block' : 'none';
             renderRankings();
             renderClassListWithViolations();
         }
@@ -360,7 +365,7 @@
                                     <span class="text-xs font-bold px-2 py-0.5 rounded ${score < 0 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${score} điểm</span>
                                     ${clsInfo.late ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">Nộp trễ SĐB</span>' : ''}
                                 </div>
-                                <button onclick="openInputModal('${cls}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition flex items-center gap-1">
+                                <button onclick="openInputModal('${cls}')" class="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition flex items-center gap-1 shadow-sm">
                                     <i class="fa-solid fa-pen-to-square"></i> Nhập Lỗi
                                 </button>
                             </div>
@@ -395,7 +400,7 @@
             document.getElementById('m_inp_tiet_kd').value = clsInfo.tiet_kd || 0;
             document.getElementById('m_inp_tre_sdb').checked = !!clsInfo.late;
 
-            const students = CLASS_STUDENTS[cls] || ["Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Phan Trần Phúc Đạt"];
+            const students = CLASS_STUDENTS[cls] || [];
             const container = document.getElementById('modalStudentList');
 
             container.innerHTML = students.map((st, i) => {
@@ -413,9 +418,7 @@
 
             students.forEach((_, i) => parseModalStudentCode(i));
 
-            const modal = document.getElementById('inputModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            document.getElementById('inputModal').style.display = 'flex';
         }
 
         function parseModalStudentCode(index) {
@@ -432,9 +435,7 @@
         }
 
         function closeInputModal() {
-            const modal = document.getElementById('inputModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            document.getElementById('inputModal').style.display = 'none';
         }
 
         function saveModalData() {
@@ -443,7 +444,7 @@
 
             if (!appState.data[appState.currentWeek]) appState.data[appState.currentWeek] = {};
 
-            const students = CLASS_STUDENTS[cls] || ["Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Phan Trần Phúc Đạt"];
+            const students = CLASS_STUDENTS[cls] || [];
             let violationsMap = {};
 
             students.forEach((st, i) => {
@@ -471,13 +472,11 @@
 
         function toggleAdminModal() {
             const modal = document.getElementById('adminModal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                modal.style.display = 'flex';
                 document.getElementById('lockToggle').checked = appState.isLocked;
             } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
+                modal.style.display = 'none';
             }
         }
 
@@ -485,8 +484,8 @@
             const inputPass = document.getElementById('adminPassInput').value;
             if (inputPass === ADMIN_PASS) {
                 isAdminLoggedIn = true;
-                document.getElementById('adminPassArea').classList.add('hidden');
-                document.getElementById('adminControlArea').classList.remove('hidden');
+                document.getElementById('adminPassArea').style.display = 'none';
+                document.getElementById('adminControlArea').style.display = 'block';
             } else {
                 alert("Mật khẩu Admin không chính xác!");
             }
@@ -495,8 +494,8 @@
         function logoutAdmin() {
             isAdminLoggedIn = false;
             document.getElementById('adminPassInput').value = '';
-            document.getElementById('adminPassArea').classList.remove('hidden');
-            document.getElementById('adminControlArea').classList.add('hidden');
+            document.getElementById('adminPassArea').style.display = 'block';
+            document.getElementById('adminControlArea').style.display = 'none';
         }
 
         function toggleLock() {
