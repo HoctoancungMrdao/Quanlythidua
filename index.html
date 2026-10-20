@@ -11,6 +11,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .modal-box { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col pb-12">
@@ -25,8 +26,8 @@
                     <p class="text-[11px] text-red-100">Quản Lý Thi Đua Tuần</p>
                 </div>
             </div>
-            <button onclick="openAdminModal()" class="px-3 py-1 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1.5 shadow">
-                <i class="fa-solid fa-shield-halved"></i> <span id="lockStatusBtn">Đã Khóa</span>
+            <button id="lockStatusBtn" onclick="openAdminModal()" class="px-3 py-1 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-lock"></i> Đã Khóa
             </button>
         </div>
     </header>
@@ -47,8 +48,8 @@
         </section>
 
         <!-- BANNER KHÓA -->
-        <div id="lockBanner" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm flex items-center justify-between">
-            <div><i class="fa-solid fa-lock mr-1.5 text-amber-600"></i><strong>Hệ thống đang khóa:</strong> Cần bấm nút BTC Khóa góc trên để mở quyền chỉnh sửa.</div>
+        <div id="lockBanner" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm">
+            <i class="fa-solid fa-lock mr-1.5 text-amber-600"></i><strong>Hệ thống đang khóa:</strong> Bấm nút Đã Khóa góc trên để mở quyền chỉnh sửa.
         </div>
 
         <!-- 2. KẾT QUẢ XẾP HẠNG PHÍA TRÊN -->
@@ -75,7 +76,7 @@
     </main>
 
     <!-- MODAL NHẬP LỖI HỌC SINH -->
-    <div id="inputModal" style="display: none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center p-3">
+    <div id="inputModal" class="modal-box p-3">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between">
                 <h3 class="font-bold text-sm" id="modalTitle">Nhập Vi Phạm Lớp</h3>
@@ -110,7 +111,7 @@
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Mã Lỗi Học Sinh</h4>
                     <p class="text-[11px] text-slate-500">Gõ mã lỗi cách nhau bằng khoảng trắng (Ví dụ: <code class="bg-slate-100 px-1 font-bold text-red-600">14 15 27</code>)</p>
-                    <div id="modalStudentList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
+                    <div id="modalStudentList" class="space-y-2 max-h-[250px] overflow-y-auto pr-1"></div>
                 </div>
 
                 <!-- Phạt Trễ SĐB -->
@@ -129,8 +130,8 @@
         </div>
     </div>
 
-    <!-- MODAL BẢO MẬT BTC (KHÓA MẶC ĐỊNH) -->
-    <div id="adminModal" style="display: none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center p-4">
+    <!-- MODAL BẢO MẬT BTC -->
+    <div id="adminModal" class="modal-box p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 space-y-3">
             <div class="flex items-center justify-between border-b pb-2">
                 <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
@@ -142,7 +143,7 @@
             <form onsubmit="handleAdminSubmit(event)" class="space-y-3">
                 <div class="space-y-1">
                     <label class="block text-xs font-bold text-slate-700">Mật khẩu Admin mở khóa:</label>
-                    <input type="password" id="adminPassInput" placeholder="Nhập Khuon@247..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-red-600" autofocus>
+                    <input type="password" id="adminPassInput" placeholder="Nhập Khuon@247..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-red-600">
                 </div>
                 <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition shadow">
                     Mở Khóa Chỉnh Sửa
@@ -152,7 +153,7 @@
     </div>
 
     <script>
-        const ADMIN_PASS = "Khuon@247"; // Mật khẩu Admin chuẩn
+        const ADMIN_PASS = "Khuon@247";
 
         const RULES = {
             1: { text: "Không thuộc bài/điểm kém", pts: -5 },
@@ -181,7 +182,6 @@
 
         const SAMPLE_CLASSES = ["10A1", "10A2", "10A3"];
 
-        // DANH SÁCH CHÍNH XÁC CHUẨN 100% TỪ HÌNH ẢNH
         const CLASS_STUDENTS = {
             "10A1": [
                 "Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Nguyễn Lê Thùy Dương", "Phan Trần Phúc Đạt",
@@ -221,7 +221,7 @@
         };
 
         let currentActiveEditClass = null;
-        let isUnlocked = false; // MẶC ĐỊNH LUÔN KHÓA
+        let isUnlocked = false;
 
         let appState = {
             currentWeek: "Tuần 05",
@@ -229,24 +229,10 @@
         };
 
         window.onload = function() {
-            // Xóa cache cũ gây lỗi
-            localStorage.removeItem('TTS_FULL_EMULATION_APP');
-            localStorage.removeItem('TTS_FULL_EMULATION_APP_V2');
-            
-            const saved = localStorage.getItem('TTS_CLEAN_V4');
-            if (saved) {
-                try { appState = JSON.parse(saved); } catch(e) {}
-            }
-
-            if (!appState.data) appState.data = {};
-            document.getElementById('weekSelect').value = appState.currentWeek || "Tuần 05";
-            
+            localStorage.clear(); // Tự động xóa sạch toàn bộ cache cũ để không bị treo nút
+            document.getElementById('weekSelect').value = "Tuần 05";
             renderAll();
         };
-
-        function saveState() {
-            localStorage.setItem('TTS_CLEAN_V4', JSON.stringify(appState));
-        }
 
         function changeWeek() {
             appState.currentWeek = document.getElementById('weekSelect').value;
@@ -255,8 +241,8 @@
 
         function renderAll() {
             document.getElementById('lblWeekRank').innerText = appState.currentWeek;
-            document.getElementById('lockStatusBtn').innerText = isUnlocked ? "Đã Mở Khóa" : "Đã Khóa";
-            document.getElementById('lockBanner').style.display = isUnlocked ? 'none' : 'flex';
+            document.getElementById('lockStatusBtn').innerHTML = isUnlocked ? '<i class="fa-solid fa-lock-open"></i> Đã Mở Khóa' : '<i class="fa-solid fa-lock"></i> Đã Khóa';
+            document.getElementById('lockBanner').style.display = isUnlocked ? 'none' : 'block';
             renderRankings();
             renderClassListWithViolations();
         }
@@ -353,7 +339,7 @@
                                 <span class="text-xs font-bold px-2 py-0.5 rounded ${score < 0 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${score} điểm</span>
                                 ${clsInfo.late ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">Nộp trễ SĐB</span>' : ''}
                             </div>
-                            <button type="button" onclick="openInputModal('${cls}')" class="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition flex items-center gap-1 shadow-sm">
+                            <button type="button" onclick="openInputModal('${cls}')" class="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition flex items-center gap-1 shadow-sm cursor-pointer">
                                 <i class="fa-solid fa-pen-to-square"></i> Nhập Lỗi
                             </button>
                         </div>
@@ -371,7 +357,7 @@
 
         function openInputModal(cls) {
             if (!isUnlocked) {
-                alert("Hệ thống đang khóa! Hãy nhập mật khẩu Admin để mở khóa.");
+                alert("Hệ thống đang khóa! Vui lòng nhập mật khẩu Admin để mở khóa.");
                 openAdminModal();
                 return;
             }
@@ -451,7 +437,6 @@
                 violations: violationsMap
             };
 
-            saveState();
             renderAll();
             closeInputModal();
             alert(`Đã lưu dữ liệu Lớp ${cls} thành công!`);
