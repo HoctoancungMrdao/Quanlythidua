@@ -13,273 +13,443 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col pb-10">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col pb-12">
 
-    <!-- TOP HEADER -->
+    <!-- HEADER -->
     <header class="bg-red-700 text-white sticky top-0 z-40 shadow-md">
-        <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-flag text-yellow-300 text-lg"></i>
                 <div>
                     <h1 class="font-bold text-sm md:text-base leading-tight uppercase">THCS-THPT TRẦN TRƯỜNG SINH</h1>
-                    <p class="text-[11px] text-red-100">Quản Lý & Tổng Kết Thi Đua Tuần</p>
+                    <p class="text-[11px] text-red-100">Quản Lý Thi Đua & Vi Phạm Tuần</p>
                 </div>
             </div>
-
-            <div class="flex items-center space-x-2">
-                <span id="lockBadge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500 text-white flex items-center gap-1">
-                    <i class="fa-solid fa-lock-open"></i> Đang mở
-                </span>
-                <button onclick="toggleAdminModal()" class="p-1.5 rounded bg-red-800 hover:bg-red-900 text-white text-xs">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-            </div>
+            <button onclick="toggleAdminModal()" class="px-2.5 py-1 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1">
+                <i class="fa-solid fa-lock"></i> <span id="lockBadgeText">BTC Khóa</span>
+            </button>
         </div>
     </header>
 
-    <!-- NAV TABS -->
-    <nav class="bg-white border-b border-slate-200 sticky top-[53px] z-30 shadow-sm">
-        <div class="max-w-3xl mx-auto flex">
-            <button onclick="switchTab('rank')" id="btn-rank" class="tab-btn flex-1 py-2.5 text-center font-bold text-xs md:text-sm border-b-2 border-red-600 text-red-600 flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-trophy"></i>
-                <span>Xếp Hạng 3 Nhóm</span>
-            </button>
-            <button onclick="switchTab('input')" id="btn-input" class="tab-btn flex-1 py-2.5 text-center font-bold text-xs md:text-sm border-b-2 border-transparent text-slate-500 flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span>Nhập Điểm Lớp</span>
-            </button>
-        </div>
-    </nav>
+    <main class="max-w-4xl w-full mx-auto p-3 space-y-5 flex-grow">
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-3xl w-full mx-auto p-3 space-y-4 flex-grow">
-
-        <div id="lockBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-3 rounded text-xs text-amber-800">
-            <i class="fa-solid fa-lock mr-1"></i> <strong>Đã khóa nhập liệu:</strong> Hệ thống đã đóng khóa. Liên hệ Ban Tổ Chức để mở quyền Chỉnh sửa.
-        </div>
-
-        <!-- TAB 1: BẢNG XẾP HẠNG 3 NHÓM -->
-        <section id="sec-rank" class="space-y-4">
-            <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
-                <span class="text-xs font-bold text-slate-600">Chọn Tuần Tổng Kết:</span>
-                <select id="weekSelect" onchange="changeWeek()" class="bg-slate-50 border border-slate-300 font-bold text-xs text-red-700 rounded px-2 py-1">
-                    <option value="Tuần 05">Tuần 05 (05/10 - 09/10)</option>
-                    <option value="Tuần 06">Tuần 06 (12/10 - 16/10)</option>
-                    <option value="Tuần 07">Tuần 07 (19/10 - 23/10)</option>
-                </select>
+        <!-- 1. MỤC CHỌN TUẦN RIÊNG BIỆT -->
+        <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-calendar-week text-red-600 text-lg"></i>
+                <span class="text-xs md:text-sm font-bold text-slate-700">Chọn Tuần Quản Lý:</span>
             </div>
-
-            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div class="bg-blue-700 text-white px-3 py-2 font-bold text-xs">NHÓM 1 (10A1, 10A2, 11A4, 11A5, 12A1)</div>
-                <div id="group1-list" class="divide-y divide-slate-100"></div>
-            </div>
-
-            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div class="bg-emerald-700 text-white px-3 py-2 font-bold text-xs">NHÓM 2 (10A3, 11A3, 12A2, 12A3, 12A4, 12A5)</div>
-                <div id="group2-list" class="divide-y divide-slate-100"></div>
-            </div>
-
-            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div class="bg-purple-700 text-white px-3 py-2 font-bold text-xs">NHÓM 3 (10A4, 10A5, 10A6, 10A7, 11A1, 11A2)</div>
-                <div id="group3-list" class="divide-y divide-slate-100"></div>
-            </div>
+            <select id="weekSelect" onchange="changeWeek()" class="bg-red-50 border border-red-300 font-bold text-xs md:text-sm text-red-700 rounded-lg px-3 py-1.5 focus:outline-none">
+                <option value="Tuần 05">Tuần 05 (05/10 - 09/10)</option>
+                <option value="Tuần 06">Tuần 06 (12/10 - 16/10)</option>
+                <option value="Tuần 07">Tuần 07 (19/10 - 23/10)</option>
+            </select>
         </section>
 
-        <!-- TAB 2: FORM NHẬP ĐIỂM -->
-        <section id="sec-input" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-4">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-                    <label class="font-bold text-sm text-slate-700">Chọn Lớp Nhập Điểm:</label>
-                    <select id="classSelect" class="bg-red-50 border border-red-300 font-bold text-sm text-red-700 rounded px-3 py-1.5"></select>
+        <!-- BANNER KHÓA -->
+        <div id="lockBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium">
+            <i class="fa-solid fa-lock mr-1"></i> Hệ thống đã đóng khóa nhập liệu cho tuần này.
+        </div>
+
+        <!-- 2. KẾT QUẢ XẾP HẠNG PHÍA TRÊN -->
+        <section class="space-y-3">
+            <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-amber-500"></i> Bảng Xếp Hạng Thi Đua <span id="lblWeekRank" class="text-red-600">Tuần 05</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Group 1 -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-blue-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 1 (Khối 10, 11, 12)</div>
+                    <div id="group1-list" class="divide-y divide-slate-100"></div>
                 </div>
 
-                <form id="entryForm" onsubmit="saveData(event)" class="space-y-4">
-                    <fieldset id="formFieldset" class="space-y-4">
-                        <div class="space-y-2">
-                            <h3 class="font-bold text-xs text-red-700 uppercase bg-red-50 p-2 rounded">I. Đánh Giá Tập Thể & Tuyên Dương</h3>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                                    <span>Tiết học tốt (+10)[cite: 1]</span>
-                                    <input type="number" min="0" id="inp_tiet_tot" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                                </div>
-                                <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                                    <span>Tiết B (-3)[cite: 1]</span>
-                                    <input type="number" min="0" id="inp_tiet_b" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                                </div>
-                                <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                                    <span>Tiết C (-10)[cite: 1]</span>
-                                    <input type="number" min="0" id="inp_tiet_c" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                                </div>
-                                <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                                    <span>Không đạt/đăng ký (-5)[cite: 1]</span>
-                                    <input type="number" min="0" id="inp_tiet_khong_dat" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                                </div>
-                            </div>
+                <!-- Group 2 -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-emerald-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 2 (Khối 10, 11, 12)</div>
+                    <div id="group2-list" class="divide-y divide-slate-100"></div>
+                </div>
 
-                            <div class="p-2.5 bg-yellow-50 border border-yellow-200 rounded space-y-1.5">
-                                <span class="font-bold text-xs text-amber-800">Tuyên dương điểm giỏi cả lớp (Số lượng)[cite: 1]:</span>
-                                <div class="grid grid-cols-3 gap-2 text-xs">
-                                    <div class="text-center">
-                                        <span class="block text-[11px] text-slate-600">Điểm 8 (+1)[cite: 1]</span>
-                                        <input type="number" min="0" id="inp_d8" value="0" class="w-full text-center border font-bold p-1 rounded mt-1">
-                                    </div>
-                                    <div class="text-center">
-                                        <span class="block text-[11px] text-slate-600">Điểm 9 (+2)[cite: 1]</span>
-                                        <input type="number" min="0" id="inp_d9" value="0" class="w-full text-center border font-bold p-1 rounded mt-1">
-                                    </div>
-                                    <div class="text-center">
-                                        <span class="block text-[11px] text-slate-600">Điểm 10 (+3)[cite: 1]</span>
-                                        <input type="number" min="0" id="inp_d10" value="0" class="w-full text-center border font-bold p-1 rounded mt-1">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2 pt-2 border-t border-slate-200">
-                            <h3 class="font-bold text-xs text-red-700 uppercase bg-red-50 p-2 rounded">II. Nhập Mã Lỗi Học Sinh Vi Phạm (Sổ Đầu Bài)</h3>
-                            <p class="text-[11px] text-slate-500">Gõ mã lỗi cách nhau bằng khoảng trắng (Ví dụ: <code class="bg-slate-100 p-0.5 font-bold text-red-600">14 15 27</code>)</p>
-                            <div id="studentRows" class="space-y-2 max-h-[350px] overflow-y-auto p-1"></div>
-                        </div>
-
-                        <div class="p-2.5 bg-rose-50 border border-rose-200 rounded">
-                            <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" id="inp_tre_sdb" class="w-4 h-4 text-red-600 rounded">
-                                <span class="text-xs font-bold text-rose-800">Lớp nộp Sổ đầu bài sau 17h00 T6 (Xếp hạng cuối)</span>
-                            </label>
-                        </div>
-                    </fieldset>
-
-                    <button type="submit" id="saveBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm transition shadow">
-                        Lưu Tổng Kết Lớp
-                    </button>
-                </form>
+                <!-- Group 3 -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-purple-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 3 (Khối 10, 11, 12)</div>
+                    <div id="group3-list" class="divide-y divide-slate-100"></div>
+                </div>
             </div>
         </section>
+
+        <!-- 3 & 4. DANH SÁCH CÁC LỚP, HỌC SINH VÀ CHI TIẾT VI PHẠM -->
+        <section class="space-y-3 pt-2">
+            <div class="flex items-center justify-between">
+                <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-red-600"></i> Chi Tiết Nhập Điểm & Vi Phạm Theo Lớp
+                </h2>
+            </div>
+
+            <!-- DANH SÁCH LỚP DẠNG ACCORDION/CARD -->
+            <div id="classListContainer" class="space-y-3"></div>
+        </section>
+
     </main>
 
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-xs w-full p-4 space-y-3">
-            <h3 class="font-bold text-sm text-slate-800 border-b pb-2">BTC Khóa Nhập Liệu</h3>
-            <label class="flex items-center justify-between p-2 bg-slate-50 rounded border cursor-pointer">
-                <span class="text-xs font-bold">Khóa hệ thống tức thì</span>
-                <input type="checkbox" id="lockToggle" onchange="toggleLock()" class="w-4 h-4 text-red-600">
-            </label>
-            <button onclick="toggleAdminModal()" class="w-full bg-slate-700 text-white font-bold py-1.5 rounded text-xs">Đóng</button>
+    <!-- MODAL NHẬP LỖI HỌC SINH CHI TIẾT -->
+    <div id="inputModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between">
+                <h3 class="font-bold text-sm" id="modalTitle">Nhập Vi Phạm Lớp</h3>
+                <button onclick="closeInputModal()" class="text-white hover:text-slate-200 text-lg">&times;</button>
+            </div>
+
+            <div class="p-4 overflow-y-auto space-y-4 flex-grow text-xs">
+                <!-- Đánh Giá Tập Thể -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">1. Đánh Giá Tập Thể</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Tiết học tốt (+10)</span>
+                            <input type="number" min="0" id="m_inp_tiet_tot" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Tiết B (-3)</span>
+                            <input type="number" min="0" id="m_inp_tiet_b" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Tiết C (-10)</span>
+                            <input type="number" min="0" id="m_inp_tiet_c" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
+                            <span>Không đạt/đăng ký (-5)</span>
+                            <input type="number" min="0" id="m_inp_tiet_khong_dat" value="0" class="w-12 text-center border font-bold p-1 rounded">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nhập Lỗi Cá Nhân Từng Bạn -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Nhập Mã Lỗi Cá Nhân Từng Học Sinh</h4>
+                    <p class="text-[11px] text-slate-500">Gõ các mã lỗi cách nhau bằng khoảng trắng (Ví dụ: <code class="bg-slate-100 px-1 font-bold text-red-600">14 15 27</code>)</p>
+                    <div id="modalStudentList" class="space-y-2"></div>
+                </div>
+
+                <!-- Nộp Trễ Sổ Đầu Bài -->
+                <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="m_inp_tre_sdb" class="w-4 h-4 text-red-600 rounded">
+                        <span class="font-bold text-rose-800">Lớp nộp Sổ đầu bài sau 17h00 T6 (Phạt xếp hạng cuối)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="p-3 border-t bg-slate-50 flex justify-end space-x-2">
+                <button onclick="closeInputModal()" class="px-3 py-1.5 rounded bg-slate-200 text-slate-700 font-bold text-xs">Hủy</button>
+                <button onclick="saveModalData()" class="px-4 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs">Lưu Kết Quả Lớp</button>
+            </div>
         </div>
     </div>
 
+    <!-- MODAL BTC KHÓA -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 space-y-3">
+            <h3 class="font-bold text-sm text-slate-800 border-b pb-2">BTC Khóa Nhập Liệu</h3>
+            <label class="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border cursor-pointer">
+                <span class="text-xs font-bold text-slate-700">Khóa nhập liệu tuần này</span>
+                <input type="checkbox" id="lockToggle" onchange="toggleLock()" class="w-4 h-4 text-red-600">
+            </label>
+            <button onclick="toggleAdminModal()" class="w-full bg-slate-700 text-white font-bold py-1.5 rounded-lg text-xs">Đóng</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT TÍNH TOÁN & HIỂN THỊ -->
     <script>
         const RULES = {
-            1: { text: "Không thuộc bài, điểm kém, ghi nợ (-5)", pts: -5 },
-            2: { text: "Cúp tiết học (-10)", pts: -10 },
-            3: { text: "Gian lận kiểm tra/thi (-20)", pts: -20 },
-            11: { text: "Vắng có phép (-1)", pts: -1 },
-            12: { text: "Vắng không phép (-5)", pts: -5 },
-            13: { text: "Đến lớp trễ (-5)", pts: -5 },
-            14: { text: "Nói chuyện, mất trật tự (-5)", pts: -5 },
-            15: { text: "Sai đồng phục, phù hiệu (-5)", pts: -5 },
-            16: { text: "Tô son, sơn móng (-10)", pts: -10 },
-            17: { text: "Lớp ồn/không nghiêm túc (-20)", pts: -20 },
-            18: { text: "Để xe sai quy định (-20)", pts: -20 },
-            19: { text: "Cư xử thiếu văn hóa (-20)", pts: -20 },
-            20: { text: "Ăn mặc phản cảm, nhuộm tóc (-20)", pts: -20 },
-            22: { text: "Cúp chào cờ (-20)", pts: -20 },
-            23: { text: "Vô lễ thầy cô (-20)", pts: -20 },
-            24: { text: "Sử dụng ĐTDĐ sai quy định (-20)", pts: -20 },
-            25: { text: "Vi phạm ATGT, trật tự xã hội (-30)", pts: -30 },
-            26: { text: "Thiếu khăn lau/bình hoa (-10)", pts: -10 },
-            27: { text: "Vệ sinh lớp không sạch (-10)", pts: -10 },
-            28: { text: "Không lau bảng (-10)", pts: -10 },
-            29: { text: "Mang thức ăn/hộp xốp vào lớp (-20)", pts: -20 },
-            30: { text: "Phá hoại tài sản/vẽ bẩn (-20)", pts: -20 }
+            1: { text: "Không thuộc bài/điểm kém", pts: -5 },
+            2: { text: "Cúp tiết học", pts: -10 },
+            3: { text: "Gian lận kiểm tra/thi", pts: -20 },
+            11: { text: "Vắng có phép", pts: -1 },
+            12: { text: "Vắng không phép", pts: -5 },
+            13: { text: "Đến lớp trễ", pts: -5 },
+            14: { text: "Mất trật tự trong giờ", pts: -5 },
+            15: { text: "Sai đồng phục/phù hiệu", pts: -5 },
+            16: { text: "Tô son/sơn móng", pts: -10 },
+            17: { text: "Lớp ồn/không nghiêm túc", pts: -20 },
+            18: { text: "Để xe sai quy định", pts: -20 },
+            19: { text: "Cư xử thiếu văn hóa", pts: -20 },
+            20: { text: "Ăn mặc phản cảm/nhuộm tóc", pts: -20 },
+            22: { text: "Cúp chào cờ", pts: -20 },
+            23: { text: "Vô lễ thầy cô", pts: -20 },
+            24: { text: "Dùng ĐTDĐ sai quy định", pts: -20 },
+            25: { text: "Vi phạm ATGT/Trật tự", pts: -30 },
+            26: { text: "Thiếu khăn lau/bình hoa", pts: -10 },
+            27: { text: "Vệ sinh lớp không sạch", pts: -10 },
+            28: { text: "Không lau bảng", pts: -10 },
+            29: { text: "Mang thức ăn/hộp xốp", pts: -20 },
+            30: { text: "Phá hoại tài sản/vẽ bẩn", pts: -20 }
         };
+
         const GROUPS = {
             1: ["10A1", "10A2", "11A4", "11A5", "12A1"],
             2: ["10A3", "11A3", "12A2", "12A3", "12A4", "12A5"],
             3: ["10A4", "10A5", "10A6", "10A7", "11A1", "11A2"]
         };
-        const ALL_CLASSES = [...GROUPS[1], ...GROUPS[2], ...GROUPS[3]];
-        let appState = {
-            currentWeek: "Tuần 05", isLocked: false,
-            data: { "Tuần 05": { "10A1": { score: 155, late: false }, "10A2": { score: 147, late: false }, "11A4": { score: 174, late: false }, "11A5": { score: 168, late: false }, "12A1": { score: 179, late: false }, "10A3": { score: 0, late: true }, "11A3": { score: -6, late: false }, "12A2": { score: 164, late: false }, "12A3": { score: 104, late: false }, "12A4": { score: 124, late: false }, "12A5": { score: 155, late: false }, "10A4": { score: 54, late: false }, "10A5": { score: 182, late: false }, "10A6": { score: -373, late: false }, "10A7": { score: 8, late: false }, "11A1": { score: 93, late: false }, "11A2": { score: -33, late: false } } }
+
+        const CLASS_STUDENTS = {
+            "10A1": ["Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Phan Trần Phúc Đạt", "Nguyễn Nhựt Huy"],
+            "10A2": ["Đặng Văn Hùng", "Lê Thị Mai", "Trần Văn Nam", "Phạm Thị Hoa"],
+            "10A3": ["Nguyễn Văn Bình", "Lê Văn Cường", "Phạm Minh Đức"],
+            "10A4": ["Vũ Hoàng Anh", "Đỗ Kim Ngân", "Trịnh Quốc Việt"],
+            "10A5": ["Bùi Tiến Dũng", "Hoàng Thùy Linh", "Nguyễn Đức Anh"],
+            "10A6": ["Trần Thị Ánh", "Lê Hoàng Phúc", "Phan Văn Khánh"],
+            "10A7": ["Nguyễn Minh Tâm", "Đặng Thanh Tùng", "Vũ Thị Yến"],
+            "11A1": ["Trần Văn Giang", "Phạm Thị Hương", "Lê Văn Khoa"],
+            "11A2": ["Hoàng Văn Long", "Nguyễn Thị Ngọc", "Đỗ Văn Phong"],
+            "11A3": ["Vũ Văn Quang", "Trịnh Thị Sơn", "Bùi Văn Thái"],
+            "11A4": ["Phan Văn Uy", "Lê Thị Vân", "Nguyễn Văn Xuân"],
+            "11A5": ["Trần Thị Yên", "Phạm Văn Hải", "Hoàng Thị Cúc"],
+            "12A1": ["Đặng Văn Dũng", "Lê Thị Giang", "Trần Văn Hòa"],
+            "12A2": ["Phạm Thị Hương", "Vũ Văn Khánh", "Bùi Thị Lan"],
+            "12A3": ["Hoàng Văn Minh", "Nguyễn Thị Nga", "Đỗ Văn Oanh"],
+            "12A4": ["Trịnh Văn Phú", "Phan Thị Quý", "Lê Văn Rồng"],
+            "12A5": ["Nguyễn Văn Sơn", "Trần Thị Tú", "Phạm Văn Uyên"]
         };
-        const SAMPLE_STUDENTS = ["Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Phan Trần Phúc Đạt", "Nguyễn Nhựt Huy"];
+
+        let currentActiveEditClass = null;
+
+        let appState = {
+            currentWeek: "Tuần 05",
+            isLocked: false,
+            data: {
+                "Tuần 05": {
+                    "10A1": { score: 90, late: false, tiet_tot: 0, tiet_b: 0, tiet_c: 1, tiet_kd: 0, violations: { "Trần Gia Bảo": "14 15" } },
+                    "10A2": { score: 100, late: false, tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, violations: {} }
+                }
+            }
+        };
 
         window.onload = function() {
-            const saved = localStorage.getItem('TTS_MINIMAL_EMULATION');
+            const saved = localStorage.getItem('TTS_FULL_EMULATION_APP');
             if (saved) appState = JSON.parse(saved);
-            populateClassSelect(); renderRankings(); renderStudentInputRows();
+            
+            document.getElementById('weekSelect').value = appState.currentWeek;
+            renderAll();
         };
 
-        function saveState() { localStorage.setItem('TTS_MINIMAL_EMULATION', JSON.stringify(appState)); }
-        function switchTab(tab) {
-            document.getElementById('sec-rank').classList.toggle('hidden', tab !== 'rank');
-            document.getElementById('sec-input').classList.toggle('hidden', tab !== 'input');
-            document.getElementById('btn-rank').className = tab === 'rank' ? 'tab-btn flex-1 py-2.5 text-center font-bold text-xs md:text-sm border-b-2 border-red-600 text-red-600 flex items-center justify-center space-x-1.5' : 'tab-btn flex-1 py-2.5 text-center font-bold text-xs md:text-sm border-b-2 border-transparent text-slate-500 flex items-center justify-center space-x-1.5';
-            document.getElementById('btn-input').className = tab === 'input' ? 'tab-btn flex-1 py-2.5 text-center font-bold text-xs md:text-sm border-b-2 border-red-600 text-red-600 flex items-center justify-center space-x-1.5' : 'tab-btn flex-1 py-2.5 text-center font-bold text-xs md:text-sm border-b-2 border-transparent text-slate-500 flex items-center justify-center space-x-1.5';
+        function saveState() {
+            localStorage.setItem('TTS_FULL_EMULATION_APP', JSON.stringify(appState));
         }
-        function populateClassSelect() {
-            document.getElementById('classSelect').innerHTML = ALL_CLASSES.map(c => `<option value="${c}">Lớp ${c}</option>`).join('');
+
+        function changeWeek() {
+            appState.currentWeek = document.getElementById('weekSelect').value;
+            renderAll();
         }
-        function changeWeek() { appState.currentWeek = document.getElementById('weekSelect').value; renderRankings(); }
+
+        function renderAll() {
+            document.getElementById('lblWeekRank').innerText = appState.currentWeek;
+            renderRankings();
+            renderClassListWithViolations();
+        }
+
+        function calculateClassScore(clsData) {
+            if (!clsData) return 100;
+            let score = 100;
+            score += (clsData.tiet_tot || 0) * 10;
+            score -= (clsData.tiet_b || 0) * 3;
+            score -= (clsData.tiet_c || 0) * 10;
+            score -= (clsData.tiet_kd || 0) * 5;
+
+            if (clsData.violations) {
+                Object.values(clsData.violations).forEach(codesStr => {
+                    if (codesStr) {
+                        codesStr.trim().split(/\s+/).forEach(c => {
+                            if (RULES[c]) score += RULES[c].pts;
+                        });
+                    }
+                });
+            }
+            return score;
+        }
+
         function renderRankings() {
             const weekData = appState.data[appState.currentWeek] || {};
+
             [1, 2, 3].forEach(g => {
                 let list = GROUPS[g].map(cls => {
                     const info = weekData[cls] || { score: 100, late: false };
-                    return { cls, score: info.score, late: info.late, isPenalized: info.score < 0 || info.late };
+                    const score = calculateClassScore(info);
+                    const isPenalized = score < 0 || info.late;
+                    return { cls, score, late: info.late, isPenalized };
                 });
-                list.sort((a, b) => (a.isPenalized && !b.isPenalized) ? 1 : (!a.isPenalized && b.isPenalized) ? -1 : b.score - a.score);
-                document.getElementById(`group${g}-list`).innerHTML = list.map((item, idx) => `
-                    <div class="px-3 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50">
-                        <div class="flex items-center space-x-3"><span class="font-bold text-slate-400 w-4">${idx + 1}</span><span class="font-bold text-slate-800">Lớp ${item.cls}</span></div>
-                        <div class="flex items-center space-x-3"><span class="font-bold text-sm ${item.score < 0 ? 'text-red-600' : 'text-blue-700'}">${item.score} đ</span><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.isPenalized ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${item.late ? 'Xếp Cuối (Trễ SĐB)' : item.score < 0 ? 'Xếp Cuối (Điểm Âm)' : `Hạng ${idx + 1}`}</span></div>
+
+                list.sort((a, b) => {
+                    if (a.isPenalized && !b.isPenalized) return 1;
+                    if (!a.isPenalized && b.isPenalized) return -1;
+                    return b.score - a.score;
+                });
+
+                const container = document.getElementById(`group${g}-list`);
+                container.innerHTML = list.map((item, idx) => `
+                    <div class="px-3 py-2 flex items-center justify-between text-xs hover:bg-slate-50">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-slate-400 w-4">${idx + 1}</span>
+                            <span class="font-bold text-slate-800">Lớp ${item.cls}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold ${item.score < 0 ? 'text-red-600' : 'text-blue-700'}">${item.score} đ</span>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${item.isPenalized ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
+                                ${item.late ? 'Trễ SĐB' : item.score < 0 ? 'Điểm Âm' : `Hạng ${idx + 1}`}
+                            </span>
+                        </div>
                     </div>
                 `).join('');
             });
         }
-        function renderStudentInputRows() {
-            document.getElementById('studentRows').innerHTML = SAMPLE_STUDENTS.map((st, i) => `
-                <div class="p-2 bg-slate-50 border border-slate-200 rounded space-y-1">
-                    <div class="flex justify-between items-center text-xs"><span class="font-bold text-slate-700">${st}</span><span id="st_desc_${i}" class="text-[10px] text-red-600 font-medium italic"></span></div>
-                    <input type="text" id="st_code_${i}" oninput="parseStudentCode(${i})" placeholder="Nhập mã lỗi: 14 15..." class="w-full border rounded px-2 py-1 text-xs font-bold uppercase text-slate-800">
-                </div>
-            `).join('');
-        }
-        function parseStudentCode(index) {
-            const val = document.getElementById(`st_code_${index}`).value.trim();
-            document.getElementById(`st_desc_${index}`).innerText = val ? val.split(/\s+/).map(c => RULES[c] ? RULES[c].text : '').filter(Boolean).join(", ") : "";
-        }
-        function saveData(e) {
-            e.preventDefault();
-            if (appState.isLocked) return alert("BTC đã khóa nhập liệu!");
-            const cls = document.getElementById('classSelect').value;
-            let total = 100;
-            total += (parseInt(document.getElementById('inp_tiet_tot').value) || 0) * 10;
-            total -= (parseInt(document.getElementById('inp_tiet_b').value) || 0) * 3;
-            total -= (parseInt(document.getElementById('inp_tiet_c').value) || 0) * 10;
-            total -= (parseInt(document.getElementById('inp_tiet_khong_dat').value) || 0) * 5;
-            total += (parseInt(document.getElementById('inp_d8').value) || 0) * 1;
-            total += (parseInt(document.getElementById('inp_d9').value) || 0) * 2;
-            total += (parseInt(document.getElementById('inp_d10').value) || 0) * 3;
 
-            SAMPLE_STUDENTS.forEach((_, i) => {
-                const val = document.getElementById(`st_code_${i}`).value.trim();
-                if (val) val.split(/\s+/).forEach(c => { if (RULES[c]) total += RULES[c].pts; });
+        function renderClassListWithViolations() {
+            const container = document.getElementById('classListContainer');
+            const weekData = appState.data[appState.currentWeek] || {};
+
+            let html = '';
+            Object.keys(GROUPS).forEach(g => {
+                GROUPS[g].forEach(cls => {
+                    const clsInfo = weekData[cls] || { tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} };
+                    const score = calculateClassScore(clsInfo);
+                    const students = CLASS_STUDENTS[cls] || [];
+                    const violationsMap = clsInfo.violations || {};
+
+                    let violationRowsHTML = '';
+                    let hasViolation = false;
+
+                    students.forEach(st => {
+                        const codes = violationsMap[st];
+                        if (codes && codes.trim() !== '') {
+                            hasViolation = true;
+                            const parsedDetails = codes.trim().split(/\s+/).map(c => {
+                                return RULES[c] ? `<span class="bg-red-100 text-red-700 font-bold px-1 rounded">[Mã ${c}] ${RULES[c].text} (${RULES[c].pts}đ)</span>` : `<span class="bg-slate-100 text-slate-600 px-1 rounded">[Mã ${c} N/A]</span>`;
+                            }).join(' ');
+
+                            violationRowsHTML += `
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs py-1 border-b border-slate-100 gap-1">
+                                    <span class="font-bold text-slate-700"><i class="fa-solid fa-user-xmark text-red-500 mr-1"></i>${st}</span>
+                                    <div class="flex flex-wrap gap-1">${parsedDetails}</div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    html += `
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-2">
+                            <div class="flex items-center justify-between border-b pb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold text-sm text-slate-800">Lớp ${cls}</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded ${score < 0 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${score} điểm</span>
+                                    ${clsInfo.late ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">Nộp trễ SĐB</span>' : ''}
+                                </div>
+                                <button onclick="openInputModal('${cls}')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition">
+                                    <i class="fa-solid fa-pen-to-square mr-1"></i>Nhập Lỗi
+                                </button>
+                            </div>
+
+                            <div class="space-y-1">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase">Danh sách học sinh vi phạm công khai:</span>
+                                ${hasViolation ? `<div class="space-y-1 bg-slate-50 p-2 rounded-lg border border-slate-100">${violationRowsHTML}</div>` : '<p class="text-xs text-emerald-600 font-medium italic"><i class="fa-solid fa-circle-check mr-1"></i>Không có học sinh vi phạm trong tuần.</p>'}
+                            </div>
+                        </div>
+                    `;
+                });
             });
 
-            if (!appState.data[appState.currentWeek]) appState.data[appState.currentWeek] = {};
-            appState.data[appState.currentWeek][cls] = { score: total, late: document.getElementById('inp_tre_sdb').checked };
-            saveState(); renderRankings();
-            alert(`Đã lưu thành công Lớp ${cls}: ${total} điểm!`);
+            container.innerHTML = html;
         }
-        function toggleAdminModal() { document.getElementById('adminModal').classList.toggle('hidden'); }
+
+        function openInputModal(cls) {
+            if (appState.isLocked) {
+                alert("BTC đã khóa nhập liệu cho tuần này!");
+                return;
+            }
+
+            currentActiveEditClass = cls;
+            document.getElementById('modalTitle').innerText = `Nhập Vi Phạm - Lớp ${cls} (${appState.currentWeek})`;
+
+            const weekData = appState.data[appState.currentWeek] || {};
+            const clsInfo = weekData[cls] || { tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} };
+
+            document.getElementById('m_inp_tiet_tot').value = clsInfo.tiet_tot || 0;
+            document.getElementById('m_inp_tiet_b').value = clsInfo.tiet_b || 0;
+            document.getElementById('m_inp_tiet_c').value = clsInfo.tiet_c || 0;
+            document.getElementById('m_inp_tiet_kd').value = clsInfo.tiet_kd || 0;
+            document.getElementById('m_inp_tre_sdb').checked = !!clsInfo.late;
+
+            const students = CLASS_STUDENTS[cls] || [];
+            const container = document.getElementById('modalStudentList');
+
+            container.innerHTML = students.map((st, i) => {
+                const val = (clsInfo.violations && clsInfo.violations[st]) ? clsInfo.violations[st] : '';
+                return `
+                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-700">${st}</span>
+                            <span id="m_st_desc_${i}" class="text-[10px] text-red-600 font-medium italic"></span>
+                        </div>
+                        <input type="text" id="m_st_code_${i}" value="${val}" oninput="parseModalStudentCode(${i})" placeholder="Gõ mã lỗi: 14 15..." class="w-full border rounded px-2 py-1 text-xs font-bold uppercase text-slate-800">
+                    </div>
+                `;
+            }).join('');
+
+            students.forEach((_, i) => parseModalStudentCode(i));
+            document.getElementById('inputModal').classList.remove('hidden');
+        }
+
+        function parseModalStudentCode(index) {
+            const val = document.getElementById(`m_st_code_${index}`).value.trim();
+            const descEl = document.getElementById(`m_st_desc_${index}`);
+            if (!val) { descEl.innerText = ""; return; }
+
+            const codes = val.split(/\s+/);
+            let parsedText = [];
+            codes.forEach(c => { if (RULES[c]) parsedText.push(RULES[c].text); });
+            descEl.innerText = parsedText.length > 0 ? parsedText.join(", ") : "Mã không hợp lệ";
+        }
+
+        function closeInputModal() {
+            document.getElementById('inputModal').classList.add('hidden');
+        }
+
+        function saveModalData() {
+            if (!currentActiveEditClass) return;
+            const cls = currentActiveEditClass;
+
+            if (!appState.data[appState.currentWeek]) appState.data[appState.currentWeek] = {};
+
+            const students = CLASS_STUDENTS[cls] || [];
+            let violationsMap = {};
+
+            students.forEach((st, i) => {
+                const val = document.getElementById(`m_st_code_${i}`).value.trim();
+                if (val) violationsMap[st] = val;
+            });
+
+            appState.data[appState.currentWeek][cls] = {
+                tiet_tot: parseInt(document.getElementById('m_inp_tiet_tot').value) || 0,
+                tiet_b: parseInt(document.getElementById('m_inp_tiet_b').value) || 0,
+                tiet_c: parseInt(document.getElementById('m_inp_tiet_c').value) || 0,
+                tiet_kd: parseInt(document.getElementById('m_inp_tiet_kd').value) || 0,
+                late: document.getElementById('m_inp_tre_sdb').checked,
+                violations: violationsMap
+            };
+
+            saveState();
+            renderAll();
+            closeInputModal();
+            alert(`Đã lưu dữ liệu vi phạm Lớp ${cls} thành công!`);
+        }
+
+        function toggleAdminModal() {
+            document.getElementById('adminModal').classList.toggle('hidden');
+        }
+
         function toggleLock() {
             appState.isLocked = document.getElementById('lockToggle').checked;
-            document.getElementById('lockBadge').className = appState.isLocked ? "px-2 py-0.5 rounded text-[11px] font-bold bg-red-800 text-white flex items-center gap-1" : "px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500 text-white flex items-center gap-1";
-            document.getElementById('lockBadge').innerHTML = appState.isLocked ? '<i class="fa-solid fa-lock"></i> Đã khóa' : '<i class="fa-solid fa-lock-open"></i> Đang mở';
+            document.getElementById('lockBadgeText').innerText = appState.isLocked ? "Đã Khóa" : "Đang Mở";
             document.getElementById('lockBanner').classList.toggle('hidden', !appState.isLocked);
-            document.getElementById('formFieldset').disabled = appState.isLocked;
             saveState();
         }
     </script>
