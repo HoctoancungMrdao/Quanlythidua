@@ -3,648 +3,944 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng Kết Thi Đua - THCS-THPT Trần Trường Sinh</title>
+    <title>Hệ Thống Chấm Điểm & Tổng Kết Thi Đua Hàng Tuần (TKTĐ)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .modal-box { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for better UI */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; font-size: 11pt; }
+            .card-box { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+        }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col pb-12">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- HEADER -->
-    <header class="bg-red-700 text-white sticky top-0 z-40 shadow-md">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-flag text-yellow-300 text-lg"></i>
+    <!-- TOP HEADER -->
+    <header class="bg-gradient-to-r from-blue-900 via-indigo-800 to-blue-900 text-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-yellow-400 text-blue-950 p-2 rounded-xl shadow-inner font-black text-xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
                 <div>
-                    <h1 class="font-bold text-sm md:text-base leading-tight uppercase">THCS-THPT TRẦN TRƯỜNG SINH</h1>
-                    <p class="text-[11px] text-red-100">Hệ Thống Quản Lý Thi Đua & Vi Phạm Tuần</p>
+                    <h1 class="font-extrabold text-lg sm:text-xl tracking-wide uppercase leading-tight">SỔ CHẤM ĐIỂM THI ĐỦA TKTĐ</h1>
+                    <p class="text-xs text-blue-200 font-medium">Hệ thống quản lý & đánh giá thi đua học sinh hàng tuần</p>
                 </div>
             </div>
-            <button id="lockStatusBtn" onclick="openAdminModal()" class="px-3 py-1.5 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
-                <i class="fa-solid fa-lock"></i> BTC Khóa
-            </button>
+
+            <!-- Quick Info & Reset Header Tools -->
+            <div class="flex items-center space-x-2 text-xs sm:text-sm">
+                <button onclick="resetDataPrompt()" class="px-3 py-1.5 bg-blue-950/60 hover:bg-red-600 rounded-lg text-blue-100 hover:text-white transition flex items-center gap-1.5 border border-blue-700/50">
+                    <i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">Đặt Lại Ban Đầu</span>
+                </button>
+                <button onclick="exportJSON()" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 rounded-lg text-white transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-file-export"></i> <span class="hidden sm:inline">Xuất File</span>
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-semibold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-print"></i> <span>In Báo Cáo</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="max-w-4xl w-full mx-auto p-3 space-y-4 flex-grow">
+    <!-- NAVIGATION TABS -->
+    <div class="bg-white border-b border-slate-200 shadow-sm sticky top-[60px] z-40 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 py-2">
+            <button id="tab-btn-input" onclick="switchTab('input')" class="px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md">
+                <i class="fa-solid fa-pen-to-square"></i> 1. Nhập Điểm Lớp Chi Tiết
+            </button>
+            <button id="tab-btn-summary" onclick="switchTab('summary')" class="px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-chart-line"></i> 2. Bảng Tổng Kết Thi Đua (3 Khối)
+            </button>
+            <button id="tab-btn-guide" onclick="switchTab('guide')" class="px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
+                <i class="fa-solid fa-circle-info"></i> Quy Định Mã SBD & Tiêu Chí
+            </button>
+        </div>
+    </div>
 
-        <!-- CHỌN TUẦN -->
-        <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-calendar-week text-red-600 text-lg"></i>
-                <span class="text-xs md:text-sm font-bold text-slate-700">Chọn Tuần Quản Lý:</span>
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- TAB 1: INPUT TAB -->
+        <div id="tab-input" class="space-y-6">
+            
+            <!-- STEP 1 & STEP 2 SELECTORS BAR -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 card-box no-print">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    
+                    <!-- BƯỚC 1: CHỌN TUẦN -->
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1.5 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">1</span>
+                            BƯỚC 1: Chọn Tuần Học
+                        </label>
+                        <select id="select-week" onchange="changeWeekOrClass()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-bold text-base rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 cursor-pointer shadow-sm">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- BƯỚC 2: CHỌN LỚP (MẪU 3 LỚP) -->
+                    <div class="md:col-span-5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1.5 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">2</span>
+                            BƯỚC 2: Chọn Lớp Thi Đua Mẫu
+                        </label>
+                        <select id="select-class" onchange="changeWeekOrClass()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-bold text-base rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 cursor-pointer shadow-sm">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- CURRENT CLASS QUICK STATUS DISPLAY -->
+                    <div class="md:col-span-3 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-3 flex items-center justify-between shadow-inner">
+                        <div>
+                            <span class="text-xs text-indigo-600 font-bold block uppercase tracking-wide">Điểm Lớp Hiện Tại</span>
+                            <div class="flex items-baseline gap-1">
+                                <span id="current-score-display" class="text-3xl font-extrabold text-indigo-700">100</span>
+                                <span class="text-xs font-semibold text-slate-500">/ 100 điểm ban đầu</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span id="current-rank-badge" class="inline-block px-3 py-1 bg-amber-400 text-amber-950 font-black text-xs rounded-full shadow-sm mb-1">
+                                Hạng: 1
+                            </span>
+                            <div id="current-group-label" class="text-[11px] font-semibold text-slate-500">Khối 10</div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <select id="weekSelect" onchange="changeWeek()" class="bg-red-50 border border-red-300 font-bold text-xs md:text-sm text-red-700 rounded-lg px-3 py-1.5 focus:outline-none cursor-pointer">
-                <option value="Tuần 05">Tuần 05 (05/10 - 09/10)</option>
-                <option value="Tuần 06">Tuần 06 (12/10 - 16/10)</option>
-                <option value="Tuần 07">Tuần 07 (19/10 - 23/10)</option>
-            </select>
-        </section>
 
-        <!-- BANNER KHÓA -->
-        <div id="lockBanner" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm">
-            <i class="fa-solid fa-lock mr-1.5 text-amber-600"></i><strong>Hệ thống đang khóa:</strong> Bấm nút <b>BTC Khóa</b> góc trên và nhập mật khẩu Admin (<code class="bg-amber-100 px-1 font-bold">Khuon@247</code>) để mở quyền nhập vi phạm.
+            <!-- PRINT HEADER INFORMATION (Only appears when printing) -->
+            <div class="hidden print-only text-center my-4 border-b pb-4">
+                <h2 class="text-xl font-bold uppercase">PHIẾU BÁO CHẤM ĐIỂM THI ĐỦA HÀNG TUẦN</h2>
+                <div class="text-sm font-semibold text-slate-700 mt-1">
+                    <span id="print-week-title">Tuần 1</span> - Lớp: <span id="print-class-title" class="text-indigo-800 font-extrabold">10A6</span> 
+                    (Mã SBD mẫu: 1060xx) - Tổng Điểm: <span id="print-score-title" class="font-extrabold">100</span>
+                </div>
+            </div>
+
+            <!-- BƯỚC 3: HIỂN THỊ & NHẬP LIỆU 38 TIÊU CHÍ -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-box">
+                <!-- Card Header -->
+                <div class="bg-slate-800 text-white px-5 py-4 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <h2 class="font-extrabold text-base sm:text-lg flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-yellow-400"></i> BƯỚC 3: Danh Sách 38 Tiêu Chí Chấm Điểm
+                        </h2>
+                        <p class="text-xs text-slate-300">Điểm khởi điểm: 100 điểm. Lỗi tập thể nhập Số Lượng; Lỗi cá nhân nhập STT (2 số cuối SBD).</p>
+                    </div>
+                    <div class="flex items-center gap-2 no-print">
+                        <button onclick="clearCurrentClassData()" class="px-3 py-1.5 bg-slate-700 hover:bg-rose-600 text-xs font-semibold rounded-lg text-slate-200 hover:text-white transition">
+                            <i class="fa-solid fa-eraser"></i> Xóa Nhập Liệu Lớp Này
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Criteria Container Grouped -->
+                <div class="p-4 sm:p-6 space-y-8" id="criteria-list-container">
+                    <!-- Dynamic rendering via JavaScript -->
+                </div>
+            </div>
+
         </div>
 
-        <!-- BẢNG XẾP HẠNG THI ĐUA -->
-        <section class="space-y-2">
-            <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-trophy text-amber-500"></i> Bảng Xếp Hạng Thi Đua <span id="lblWeekRank" class="text-red-600">Tuần 05</span>
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="bg-blue-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 1 (10A1, 10A2,...)</div>
-                    <div id="group1-list" class="divide-y divide-slate-100"></div>
+        <!-- TAB 2: SUMMARY TAB -->
+        <div id="tab-summary" class="space-y-6 hidden">
+            
+            <!-- Summary Header Controls -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 card-box flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-indigo-600"></i> BẢNG TỔNG KẾT THI ĐỦA THEO 3 NHÓM / KHỐI
+                    </h2>
+                    <p class="text-xs text-slate-500">Tự động tính toán xếp hạng dựa trên tổng điểm thi đua của từng lớp theo tuần.</p>
                 </div>
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="bg-emerald-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 2 (10A3,...)</div>
-                    <div id="group2-list" class="divide-y divide-slate-100"></div>
-                </div>
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="bg-purple-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 3 (Các lớp còn lại)</div>
-                    <div id="group3-list" class="divide-y divide-slate-100"></div>
+                <div class="flex items-center gap-3">
+                    <label for="summary-week-filter" class="text-xs font-bold uppercase text-slate-600">Chọn Tuần:</label>
+                    <select id="summary-week-filter" onchange="renderSummaryTable()" class="bg-slate-50 border border-slate-300 font-bold text-sm rounded-xl p-2 focus:ring-2 focus:ring-indigo-500">
+                        <!-- Populated dynamically -->
+                    </select>
                 </div>
             </div>
-        </section>
 
-        <!-- DANH SÁCH LỚP & SỔ DANH SÁCH BẤM XEM -->
-        <section class="space-y-3 pt-2">
-            <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-users text-red-600"></i> Danh Sách Học Sinh & Vi Phạm Lớp
-            </h2>
+            <!-- 3 GROUPS / BLOCKS SUMMARY CONTAINERS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="summary-groups-container">
+                <!-- Populated dynamically -->
+            </div>
 
-            <div id="classListContainer" class="space-y-3"></div>
-        </section>
+            <!-- ALL CLASSES RANKING OVERVIEW TABLE -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-box">
+                <div class="p-4 bg-slate-800 text-white font-bold text-base flex justify-between items-center">
+                    <span><i class="fa-solid fa-list-ol text-yellow-400 mr-2"></i> BẢNG TỔNG HỢP XẾP HẠNG TOÀN TRƯỜNG</span>
+                    <span id="summary-current-week-label" class="text-xs bg-indigo-600 px-3 py-1 rounded-full">Tuần 1</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <th class="p-3.5 text-center w-12">Hạng</th>
+                                <th class="p-3.5">Khối / Nhóm</th>
+                                <th class="p-3.5">Tên Lớp</th>
+                                <th class="p-3.5">Mã SBD Quy Định</th>
+                                <th class="p-3.5 text-center">Tổng Điểm</th>
+                                <th class="p-3.5 text-center">Xếp Hạng Khối</th>
+                                <th class="p-3.5 text-center">Đánh Giá Danh Hiệu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-classes-tbody" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- REPORT GENERATOR FOR COPYING/PRINTING -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 card-box no-print">
+                <h3 class="font-extrabold text-slate-800 text-base mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-emerald-600"></i> Báo Cáo Thi Đua Nhanh (Dùng để copy gửi Zalo/Email)
+                </h3>
+                <textarea id="text-report-area" readonly class="w-full h-40 bg-slate-50 border border-slate-300 rounded-xl p-3 font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-3"></textarea>
+                <div class="flex justify-end">
+                    <button onclick="copyReportText()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-copy"></i> Sao Chép Báo Cáo
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 3: GUIDE & SBD RULE TAB -->
+        <div id="tab-guide" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 card-box space-y-6">
+                <div>
+                    <h2 class="text-xl font-extrabold text-indigo-900 border-b pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-indigo-600"></i> Hướng Dẫn Quy Tắc Mã Số Báo Danh (SBD) & STT Học Sinh
+                    </h2>
+                    <p class="text-sm text-slate-600 mt-2">
+                        Hệ thống sử dụng quy chuẩn mã SBD 6 chữ số đại diện cho từng lớp. Khi chấm vi phạm cá nhân, giám thị/sao đỏ chỉ cần nhập <strong>2 ký tự cuối (Số thứ tự học sinh)</strong>.
+                    </p>
+                </div>
+
+                <!-- SBD Rules Table Demo -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+                        <div class="font-extrabold text-indigo-900 text-lg">Khối 10: Lớp 10A6</div>
+                        <div class="text-xs text-indigo-700 mt-1 font-semibold">Dải Mã SBD: <span class="bg-white px-2 py-0.5 rounded border border-indigo-300 font-mono">106001 - 106050</span></div>
+                        <ul class="text-xs text-slate-700 mt-3 space-y-1">
+                            <li>• VD SBD <strong>106025</strong>: STT <strong class="text-indigo-800">25</strong> (Mã nhập: 25)</li>
+                            <li>• VD SBD <strong>106026</strong>: STT <strong class="text-indigo-800">26</strong> (Mã nhập: 26)</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <div class="font-extrabold text-blue-900 text-lg">Khối 11: Lớp 11A1</div>
+                        <div class="text-xs text-blue-700 mt-1 font-semibold">Dải Mã SBD: <span class="bg-white px-2 py-0.5 rounded border border-blue-300 font-mono">111001 - 111050</span></div>
+                        <ul class="text-xs text-slate-700 mt-3 space-y-1">
+                            <li>• VD SBD <strong>111005</strong>: STT <strong class="text-blue-800">05</strong> (Mã nhập: 05)</li>
+                            <li>• VD SBD <strong>111018</strong>: STT <strong class="text-blue-800">18</strong> (Mã nhập: 18)</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                        <div class="font-extrabold text-emerald-900 text-lg">Khối 12: Lớp 12A2</div>
+                        <div class="text-xs text-emerald-700 mt-1 font-semibold">Dải Mã SBD: <span class="bg-white px-2 py-0.5 rounded border border-emerald-300 font-mono">122001 - 122050</span></div>
+                        <ul class="text-xs text-slate-700 mt-3 space-y-1">
+                            <li>• VD SBD <strong>122002</strong>: STT <strong class="text-emerald-800">02</strong> (Mã nhập: 02)</li>
+                            <li>• VD SBD <strong>122044</strong>: STT <strong class="text-emerald-800">44</strong> (Mã nhập: 44)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Input Instructions -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-2 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-keyboard text-indigo-600"></i> Hướng dẫn nhập nhanh lỗi cá nhân
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Bạn có thể nhập danh sách các STT vi phạm bằng cách gõ trực tiếp các số cách nhau bởi <strong>dấu phẩy (,), dấu gạch ngang (-), khoảng trắng</strong> hoặc bấm các gợi ý nhanh.
+                        <br>Ví dụ nhập: <code class="bg-slate-200 px-1.5 py-0.5 rounded font-mono text-slate-800">1 32 13 5 14 14 23</code> $\rightarrow$ Hệ thống tự chuẩn hóa thành: <code class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded font-mono">01-05-13-14-14-23-32</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
 
     </main>
 
-    <!-- MODAL NHẬP LỖI THEO 2 SỐ CUỐI SBD -->
-    <div id="inputModal" class="modal-box p-3">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between">
-                <h3 class="font-bold text-sm" id="modalTitle">Nhập Vi Phạm Lớp</h3>
-                <button onclick="closeInputModal()" class="text-white hover:text-slate-200 text-2xl font-bold leading-none">&times;</button>
-            </div>
+    <!-- FOOTER -->
+    <footer class="bg-slate-800 text-slate-400 py-4 text-center text-xs border-t border-slate-700 no-print mt-auto">
+        <p>© Hệ thống Quản lý Thi đua Học đường TKTĐ - Chuẩn hóa 38 Tiêu chí Thi đua</p>
+    </footer>
 
-            <div class="p-4 overflow-y-auto space-y-4 flex-grow text-xs">
-                <!-- Đánh Giá Tập Thể -->
-                <div class="space-y-2">
-                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">1. Đánh Giá Tiết Học & Tập Thể</h4>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                            <span>Tiết học tốt (+10)</span>
-                            <input type="number" min="0" id="m_inp_tiet_tot" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                        </div>
-                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                            <span>Tiết B (-3)</span>
-                            <input type="number" min="0" id="m_inp_tiet_b" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                        </div>
-                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                            <span>Tiết C (-10)</span>
-                            <input type="number" min="0" id="m_inp_tiet_c" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                        </div>
-                        <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
-                            <span>Không đạt/đăng ký (-5)</span>
-                            <input type="number" min="0" id="m_inp_tiet_khong_dat" value="0" class="w-12 text-center border font-bold p-1 rounded">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nhập Vi Phạm Theo 2 Số Cuối SBD -->
-                <div class="space-y-2">
-                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Mã Lỗi Học Sinh (Theo 2 Số Cuối SBD)</h4>
-                    <p class="text-[11px] text-slate-500">Cú pháp: <code class="bg-slate-100 px-1 font-bold text-red-600">[2 số cuối SBD]-[Mã vi phạm]</code> (Ví dụ SBD 03 dính lỗi 14 và 15: gõ <code class="bg-slate-100 px-1 font-bold text-red-600">03-14-15</code>)</p>
-                    <div id="modalStudentList" class="space-y-2 max-h-[250px] overflow-y-auto pr-1"></div>
-                </div>
-
-                <!-- Nộp Trễ Sổ Đầu Bài -->
-                <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" id="m_inp_tre_sdb" class="w-4 h-4 text-red-600 rounded">
-                        <span class="font-bold text-rose-800">Nộp Sổ đầu bài sau 17h00 T6 (Phạt xếp hạng cuối)</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="p-3 border-t bg-slate-50 flex justify-end space-x-2">
-                <button onclick="closeInputModal()" class="px-3 py-1.5 rounded bg-slate-200 text-slate-700 font-bold text-xs">Hủy</button>
-                <button onclick="saveModalData()" class="px-4 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow">Lưu Kết Quả</button>
-            </div>
-        </div>
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-700 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-msg" class="text-sm font-medium">Thông báo</span>
     </div>
 
-    <!-- MODAL ĐĂNG NHẬP ADMIN -->
-    <div id="adminModal" class="modal-box p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 space-y-3">
-            <div class="flex items-center justify-between border-b pb-2">
-                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-lock text-red-600"></i> Quản Trị BTC
-                </h3>
-                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
-            </div>
-            
-            <form onsubmit="handleAdminSubmit(event)" class="space-y-3">
-                <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700">Mật khẩu mở khóa chỉnh sửa:</label>
-                    <input type="password" id="adminPassInput" placeholder="Mật khẩu Admin..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-red-600">
-                </div>
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition shadow cursor-pointer">
-                    Mở Khóa Chỉnh Sửa
-                </button>
-            </form>
-        </div>
-    </div>
-
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        const ADMIN_PASS = "Khuon@247";
+        // ==========================================
+        // 1. DATA STRUCTURES & 38 CRITERIA DEFINITION
+        // ==========================================
 
-        // DANH MỤC 39 TIÊU CHÍ THEO FILE EXCEL TKTĐ THÁNG 10 2026-2027
-        const RULES = {
-            1: { text: "KTB, KCB, KLBT; Điểm kém; Ghi nợ", pts: -5 },
-            2: { text: "Cúp tiết học", pts: -10 },
-            3: { text: "Gian lận kiểm tra, thi", pts: -20 },
-            4: { text: "Tiết học tốt", pts: 10 },
-            5: { text: "Tiết không đạt/không đăng ký", pts: -5 },
-            6: { text: "Tiết học loại B", pts: -3 },
-            7: { text: "Tiết học loại C", pts: -10 },
-            8: { text: "Tuyên dương: Điểm 8", pts: 1 },
-            9: { text: "Tuyên dương: Điểm 9", pts: 2 },
-            10: { text: "Tuyên dương: Điểm 10", pts: 3 },
-            11: { text: "Vắng có phép", pts: -1 },
-            12: { text: "Vắng không phép", pts: -5 },
-            13: { text: "Đến lớp trễ", pts: -5 },
-            14: { text: "Mất trật tự, làm việc riêng trong giờ", pts: -5 },
-            15: { text: "Sai đồng phục, phù hiệu, dây nịt", pts: -5 },
-            16: { text: "Tô son, đánh phấn, sơn móng", pts: -10 },
-            17: { text: "Lớp ồn; Không nghiêm túc khi KT", pts: -20 },
-            18: { text: "Để xe sai quy định", pts: -20 },
-            19: { text: "Cư xử thiếu văn hóa", pts: -20 },
-            20: { text: "Ăn mặc phản cảm, nhuộm tóc, xăm hình", pts: -20 },
-            21: { text: "Không hợp tác với Cờ đỏ", pts: -20 },
-            22: { text: "Cúp tiết chào cờ", pts: -20 },
-            23: { text: "Vô lễ thầy cô, người lớn tuổi", pts: -20 },
-            24: { text: "Dùng ĐTDĐ sai quy định", pts: -20 },
-            25: { text: "Vi phạm ATGT - Trật tự xã hội", pts: -30 },
-            26: { text: "Thiếu khăn trải bàn, bình hoa, khăn lau", pts: -10 },
-            27: { text: "Vệ sinh lớp không sạch, rác ngăn bàn", pts: -10 },
-            28: { text: "Không lau bảng", pts: -10 },
-            29: { text: "Mang thức ăn, hộp xốp, ly nhựa vào lớp", pts: -20 },
-            30: { text: "Phá hoại tài sản, viết vẽ bẩn", pts: -20 },
-            31: { text: "Trực vệ sinh không tốt", pts: -20 },
-            32: { text: "Bỏ trực vệ sinh", pts: -30 },
-            33: { text: "Không tắt đèn quạt / để ghế sai chỗ", pts: -30 },
-            34: { text: "Trực SHDC chuẩn bị không tốt", pts: -20 },
-            35: { text: "Bị nhắc nhở / không trực SHDC", pts: -30 },
-            36: { text: "Không mang đầy đủ dụng cụ lao động", pts: -20 },
-            37: { text: "Không tham gia lao động trường", pts: -30 },
-            38: { text: "Phong trào: Tham gia >= 50% sĩ số", pts: 30 },
-            39: { text: "Phong trào: Tham gia < 50% sĩ số", pts: -30 }
-        };
+        // Sample Classes Configuration representing 3 Blocks
+        const SAMPLE_CLASSES = [
+            { id: "10A6", name: "Lớp 10A6", block: "Khối 10", sbdPrefix: "106", exampleSBD: "106025 (STT 26)" },
+            { id: "11A1", name: "Lớp 11A1", block: "Khối 11", sbdPrefix: "111", exampleSBD: "111005 (STT 05)" },
+            { id: "12A2", name: "Lớp 12A2", block: "Khối 12", sbdPrefix: "122", exampleSBD: "122012 (STT 12)" }
+        ];
 
-        const GROUPS = {
-            1: ["10A1", "10A2"],
-            2: ["10A3"],
-            3: []
-        };
+        // 38 Criteria Categorized into 4 Vivid Groups
+        // Type: 'group' = General Class Count | 'individual' = SBD/STT list
+        const CRITERIA_38 = [
+            // --- NHÓM 1: HỌC TẬP (10 Tiêu chí) ---
+            { id: 1, group: "Học Tập", title: "Tiết học tốt / Giờ học tốt", type: "group", points: 2, isBonus: true, desc: "Cộng điểm cho mỗi tiết học tốt" },
+            { id: 2, group: "Học Tập", title: "Tiết học loại B", type: "group", points: -2, isBonus: false, desc: "Trừ điểm tiết xếp loại B" },
+            { id: 3, group: "Học Tập", title: "Tiết học loại C", type: "group", points: -5, isBonus: false, desc: "Trừ điểm tiết xếp loại C" },
+            { id: 4, group: "Học Tập", title: "Tiết học loại D", type: "group", points: -10, isBonus: false, desc: "Trừ điểm tiết xếp loại D" },
+            { id: 5, group: "Học Tập", title: "Điểm 8, 9, 10 (Điểm tốt)", type: "group", points: 1, isBonus: true, desc: "Mỗi điểm tốt được cộng điểm" },
+            { id: 6, group: "Học Tập", title: "Không thuộc bài / Không làm bài tập", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 7, group: "Học Tập", title: "Không đem sách vở, dụng cụ học tập", type: "individual", points: -1, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 8, group: "Học Tập", title: "Mất trật tự trong giờ học", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 9, group: "Học Tập", title: "Sử dụng điện thoại không đúng quy định", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 10, group: "Học Tập", title: "Gian lận trong kiểm tra / Thi cử", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
 
-        const CLASS_STUDENTS = {
-            "10A1": [
-                { sbd: "101001", hoTen: "Từ Liêu Quốc An" },
-                { sbd: "101002", hoTen: "Nguyễn Quốc Anh" },
-                { sbd: "101003", hoTen: "Trần Gia Bảo" },
-                { sbd: "101004", hoTen: "Nguyễn Lê Thùy Dương" },
-                { sbd: "101005", hoTen: "Phan Trần Phúc Đạt" },
-                { sbd: "101006", hoTen: "Bùi Trần Hoàng Giang" },
-                { sbd: "101007", hoTen: "Nguyễn Thị Ngọc Hân" },
-                { sbd: "101008", hoTen: "Hà Huy Hoàng" },
-                { sbd: "101009", hoTen: "Nguyễn Nhựt Huy" },
-                { sbd: "101010", hoTen: "Lê Nguyễn Gia Hưng" },
-                { sbd: "101011", hoTen: "Phạm Nhật Khang" },
-                { sbd: "101012", hoTen: "Phạm Huỳnh Như Khánh" },
-                { sbd: "101013", hoTen: "Nguyễn Trần Yến Lam" },
-                { sbd: "101014", hoTen: "Bùi Thị Thùy Lan" },
-                { sbd: "101015", hoTen: "Đỗ Pha Lê" },
-                { sbd: "101016", hoTen: "Phan Thành Lợi" },
-                { sbd: "101017", hoTen: "Bùi Thị Trà My" },
-                { sbd: "101018", hoTen: "Nguyễn Thị Bảo Ngân" },
-                { sbd: "101019", hoTen: "Nguyễn Thị Thảo Ngân" },
-                { sbd: "101020", hoTen: "Nguyễn Gia Nghi" },
-                { sbd: "101021", hoTen: "Nguyễn Khánh Ngọc" },
-                { sbd: "101022", hoTen: "Võ Thị Khánh Ngọc" },
-                { sbd: "101023", hoTen: "Nguyễn Thị Thảo Nguyên" },
-                { sbd: "101024", hoTen: "Tống Hoài Nhân" },
-                { sbd: "101025", hoTen: "Hồ Phúc Nhân" },
-                { sbd: "101026", hoTen: "Lê Ngọc Như" },
-                { sbd: "101027", hoTen: "Nguyễn Tấn Phát" },
-                { sbd: "101028", hoTen: "Nguyễn Ngọc Bảo Quân" },
-                { sbd: "101029", hoTen: "Phan Đỗ Quyên" },
-                { sbd: "101030", hoTen: "Lê Hoàng Sang" },
-                { sbd: "101031", hoTen: "Hồ Thị Mỹ Tâm" },
-                { sbd: "101032", hoTen: "Võ Diễm Thi" },
-                { sbd: "101033", hoTen: "Phạm Thị Kim Thùy" },
-                { sbd: "101034", hoTen: "Nguyễn Ngọc Anh Thư" },
-                { sbd: "101035", hoTen: "Hồ Ngọc Bảo Trâm" },
-                { sbd: "101036", hoTen: "Nguyễn Trần Huyền Trân" },
-                { sbd: "101037", hoTen: "Đỗ Duy Tường" },
-                { sbd: "101038", hoTen: "Lê Vĩnh Tường" },
-                { sbd: "101039", hoTen: "Phan Như Uyên" },
-                { sbd: "101040", hoTen: "Hồ Quốc Việt" },
-                { sbd: "101041", hoTen: "Võ Thị Kha Vy" },
-                { sbd: "101042", hoTen: "Bùi Minh Vy" },
-                { sbd: "101043", hoTen: "Phan Thị Lan Vy" },
-                { sbd: "101044", hoTen: "Nguyễn Trần Như Ý" },
-                { sbd: "101045", hoTen: "Đào Phi Yến" }
-            ],
-            "10A2": [
-                { sbd: "102001", hoTen: "Nguyễn Huỳnh Cẩm Duyên" },
-                { sbd: "102002", hoTen: "Võ Quốc Hào" },
-                { sbd: "102003", hoTen: "Nguyễn Văn Đại Hênh" },
-                { sbd: "102004", hoTen: "Lê Dương Kiến Hoa" },
-                { sbd: "102005", hoTen: "Ka Huê" },
-                { sbd: "102006", hoTen: "Đặng Nhật Huy" },
-                { sbd: "102007", hoTen: "Hồ Huỳnh Nhựt Huy" },
-                { sbd: "102008", hoTen: "Nguyễn Quốc Huy" },
-                { sbd: "102009", hoTen: "Triệu Hoàng Linh" },
-                { sbd: "102010", hoTen: "Nguyễn Phú Lộc" },
-                { sbd: "102011", hoTen: "Mai Phát Lộc" },
-                { sbd: "102012", hoTen: "Nguyễn Phú Lợi" },
-                { sbd: "102013", hoTen: "Tống Phước Mạnh" },
-                { sbd: "102014", hoTen: "Nguyễn Ái My" },
-                { sbd: "102015", hoTen: "Quang Thị Thúy Ngân" },
-                { sbd: "102016", hoTen: "Đặng Hữu Nghĩa" },
-                { sbd: "102017", hoTen: "Phạm Thị Bảo Ngọc" },
-                { sbd: "102018", hoTen: "Phạm Thị Khánh Ngọc" },
-                { sbd: "102019", hoTen: "Huỳnh Thị Thúy Nguyên" },
-                { sbd: "102020", hoTen: "Phan Hoàng Nhân" },
-                { sbd: "102021", hoTen: "Nguyễn Trí Nhân" },
-                { sbd: "102022", hoTen: "Lê Phương Nhi" },
-                { sbd: "102023", hoTen: "Trần Huỳnh Hoàng Phi" },
-                { sbd: "102024", hoTen: "Mai Trọng Phúc" },
-                { sbd: "102025", hoTen: "Bùi Mai Quyên" },
-                { sbd: "102026", hoTen: "Ngô Thành Tài" },
-                { sbd: "102027", hoTen: "Đoàn Gia Tâm" },
-                { sbd: "102028", hoTen: "Nguyễn Chí Thiện" },
-                { sbd: "102029", hoTen: "Huỳnh Thơ" },
-                { sbd: "102030", hoTen: "Võ Phương Thùy" },
-                { sbd: "102031", hoTen: "Nguyễn Minh Thùy" },
-                { sbd: "102032", hoTen: "Phạm Thị Minh Thư" },
-                { sbd: "102033", hoTen: "Nguyễn Anh Thư" },
-                { sbd: "102034", hoTen: "Huỳnh Thị Anh Thư" },
-                { sbd: "102035", hoTen: "Mai Trần Hạ Thy" },
-                { sbd: "102036", hoTen: "Nguyễn Thị Ngọc Trầm" },
-                { sbd: "102037", hoTen: "Nguyễn Phú Trọng" },
-                { sbd: "102038", hoTen: "Nguyễn Thị Ngọc Truyết" },
-                { sbd: "102039", hoTen: "Nguyễn Thị Cẩm Tú" },
-                { sbd: "102040", hoTen: "Phạm Thị Mộng Tuyền" },
-                { sbd: "102041", hoTen: "Tăng Hà Vi" },
-                { sbd: "102042", hoTen: "Tống Triệu Vĩ" },
-                { sbd: "102043", hoTen: "Ngô Ngọc Vy" },
-                { sbd: "102044", hoTen: "Bùi Thị Tường Vy" },
-                { sbd: "102045", hoTen: "Lê Nguyễn Hà Vy" },
-                { sbd: "102046", hoTen: "Trần Thị Tường Vy" },
-                { sbd: "102047", hoTen: "Hồ Ngọc Yến" }
-            ],
-            "10A3": [
-                { sbd: "103001", hoTen: "Hồ Huỳnh Anh" },
-                { sbd: "103002", hoTen: "Đặng Hoàng Duy" },
-                { sbd: "103003", hoTen: "Phạm Thị Phương Hạ" },
-                { sbd: "103004", hoTen: "Đặng Nhật Hào" },
-                { sbd: "103005", hoTen: "Trần Thị Ngọc Hân" },
-                { sbd: "103006", hoTen: "Phạm Thị Tú Hân" },
-                { sbd: "103007", hoTen: "Tống Nghi Hân" },
-                { sbd: "103008", hoTen: "Ngô Thị Gia Hân" },
-                { sbd: "103009", hoTen: "Phan Nguyễn Tuấn Huy" },
-                { sbd: "103010", hoTen: "Lưu Hoàng Nhật Huy" },
-                { sbd: "103011", hoTen: "Trần Trọng Khang" },
-                { sbd: "103012", hoTen: "Lưu Văn Khuyến" },
-                { sbd: "103013", hoTen: "Phạm Vĩnh Kỳ" },
-                { sbd: "103014", hoTen: "Phạm Thị Tuyết Lê" },
-                { sbd: "103015", hoTen: "Võ Minh Lộc" },
-                { sbd: "103016", hoTen: "Lê Văn Lộc" },
-                { sbd: "103017", hoTen: "Nguyễn Thị Diễm My" },
-                { sbd: "103018", hoTen: "Phạm Thị Trà My" },
-                { sbd: "103019", hoTen: "Nguyễn Bảo Ngân" },
-                { sbd: "103020", hoTen: "Nguyễn Hồ Uyên Yến Ngọc" },
-                { sbd: "103021", hoTen: "Huỳnh Thị Khánh Ngọc" },
-                { sbd: "103022", hoTen: "Trần Hữu Nhân" },
-                { sbd: "103023", hoTen: "Nguyễn Hữu Nhân" },
-                { sbd: "103024", hoTen: "Ngô Thị Yến Nhi" },
-                { sbd: "103025", hoTen: "Nguyễn Thị Tuyết Như" },
-                { sbd: "103026", hoTen: "Huỳnh Trung Nhựt" },
-                { sbd: "103027", hoTen: "Ngô Tấn Phát" },
-                { sbd: "103028", hoTen: "Phạm Minh Phát" },
-                { sbd: "103029", hoTen: "Đồng Nam Phương" },
-                { sbd: "103030", hoTen: "Mai Thị Cẩm Quyên" },
-                { sbd: "103031", hoTen: "Trần Minh Tâm" },
-                { sbd: "103032", hoTen: "Huỳnh Thị Thu Tâm" },
-                { sbd: "103033", hoTen: "Lê Nhật Tân" },
-                { sbd: "103034", hoTen: "Lê Khánh Thi" },
-                { sbd: "103035", hoTen: "Nguyễn Thị Như Thì" },
-                { sbd: "103036", hoTen: "Huỳnh Nhựt Thiên" },
-                { sbd: "103037", hoTen: "Lê Thị Hoài Thương" },
-                { sbd: "103038", hoTen: "Phạm Minh Toàn" },
-                { sbd: "103039", hoTen: "Lê Nguyễn Hương Trà" },
-                { sbd: "103040", hoTen: "Nguyễn Gia Tuệ" },
-                { sbd: "103041", hoTen: "Trương Thiên Tường" },
-                { sbd: "103042", hoTen: "Phạm Thế Vinh" },
-                { sbd: "103043", hoTen: "Ngô Thị Tường Vy" },
-                { sbd: "103044", hoTen: "Chế Trần Tường Vy" },
-                { sbd: "103045", hoTen: "Nguyễn Lê Thảo Vy" },
-                { sbd: "103046", hoTen: "Huỳnh Thị Như Ý" },
-                { sbd: "103047", hoTen: "Võ Thị Mỹ Huyền" }
-            ]
-        };
+            // --- NHÓM 2: NỀN NẾP & KỶ LUẬT (12 Tiêu chí) ---
+            { id: 11, group: "Nền Nếp & Kỷ Luật", title: "Nghỉ học không phép", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vắng không phép" },
+            { id: 12, group: "Nền Nếp & Kỷ Luật", title: "Đi học muộn / Vào lớp muộn", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh đi trễ" },
+            { id: 13, group: "Nền Nếp & Kỷ Luật", title: "Không mặc đồng phục quy định", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 14, group: "Nền Nếp & Kỷ Luật", title: "Không đeo thẻ học sinh / Phù hiệu", type: "individual", points: -1, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 15, group: "Nền Nếp & Kỷ Luật", title: "Tóc không đúng quy định / Nhuộm tóc", type: "individual", points: -3, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 16, group: "Nền Nếp & Kỷ Luật", title: "Khỏi lớp / Khỏi trường không xin phép", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 17, group: "Nền Nếp & Kỷ Luật", title: "Không tham gia chào cờ / Sinh hoạt tập thể", type: "individual", points: -3, isBonus: false, desc: "Nhập STT học sinh vắng" },
+            { id: 18, group: "Nền Nếp & Kỷ Luật", title: "Hút thuốc / Sử dụng chất kích thích", type: "individual", points: -20, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 19, group: "Nền Nếp & Kỷ Luật", title: "Gây mất trật tự, cãi nhau, đánh nhau", type: "individual", points: -15, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 20, group: "Nền Nếp & Kỷ Luật", title: "Nói tục, chửi thề, vô lễ với giáo viên", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 21, group: "Nền Nếp & Kỷ Luật", title: "Vi phạm luật giao thông (Đi xe máy, không mũ bảo hiểm)", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 22, group: "Nền Nếp & Kỷ Luật", title: "Đi trễ tập thể (Trên 5 học sinh/lần)", type: "group", points: -5, isBonus: false, desc: "Trừ điểm vi phạm tập thể" },
 
-        let currentActiveEditClass = null;
-        let isUnlocked = false;
+            // --- NHÓM 3: VỆ SINH & LAO ĐỘNG (8 Tiêu chí) ---
+            { id: 23, group: "Vệ Sinh & Lao Động", title: "Trực nhật muộn / Trực nhật không sạch", type: "group", points: -5, isBonus: false, desc: "Trừ điểm trực nhật kém" },
+            { id: 24, group: "Vệ Sinh & Lao Động", title: "Không đổ rác đúng nơi quy định", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vứt rác bừa bãi" },
+            { id: 25, group: "Vệ Sinh & Lao Động", title: "Bỏ trực nhật / Không tham gia lao động", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh bỏ trực nhật" },
+            { id: 26, group: "Vệ Sinh & Lao Động", title: "Ăn quà vặt trong lớp học", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 27, group: "Vệ Sinh & Lao Động", title: "Không tắt điện, quạt khi ra khỏi phòng", type: "group", points: -3, isBonus: false, desc: "Trừ điểm lãng phí điện" },
+            { id: 28, group: "Vệ Sinh & Lao Động", title: "Làm hư hỏng tài sản nhà trường", type: "group", points: -10, isBonus: false, desc: "Trừ điểm vi phạm tài sản" },
+            { id: 29, group: "Vệ Sinh & Lao Động", title: "Lớp học sạch đẹp xuất sắc cả tuần", type: "group", points: 5, isBonus: true, desc: "Cộng điểm khen thưởng" },
+            { id: 30, group: "Vệ Sinh & Lao Động", title: "Tham gia lao động / Trồng cây xuất sắc", type: "group", points: 5, isBonus: true, desc: "Cộng điểm phong trào lao động" },
 
-        let appState = {
-            currentWeek: "Tuần 05",
-            data: {}
-        };
+            // --- NHÓM 4: HOẠT ĐỘNG PHONG TRÀO (8 Tiêu chí) ---
+            { id: 31, group: "Hoạt Động Phong Trào", title: "Đạt giải Phong trào / Văn nghệ / Thể thao cấp trường", type: "group", points: 10, isBonus: true, desc: "Cộng điểm thành tích" },
+            { id: 32, group: "Hoạt Động Phong Trào", title: "Đạt giải cấp Tỉnh / Thành phố", type: "group", points: 20, isBonus: true, desc: "Cộng điểm thành tích xuất sắc" },
+            { id: 33, group: "Hoạt Động Phong Trào", title: "Gương người tốt việc tốt (Nhặt được của rơi...)", type: "individual", points: 5, isBonus: true, desc: "Cộng điểm tuyên dương cá nhân" },
+            { id: 34, group: "Hoạt Động Phong Trào", title: "Không tham gia phong trào phát động", type: "group", points: -5, isBonus: false, desc: "Trừ điểm thiếu tham gia" },
+            { id: 35, group: "Hoạt Động Phong Trào", title: "Nộp báo cáo / Ke khai muộn quy định", type: "group", points: -3, isBonus: false, desc: "Trừ điểm nộp muộn" },
+            { id: 36, group: "Hoạt Động Phong Trào", title: "Vi phạm quy định Đoàn / Đội", type: "individual", points: -3, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 37, group: "Hoạt Động Phong Trào", title: "Tập thể tích cực tham gia CLB / Hoạt động trải nghiệm", type: "group", points: 5, isBonus: true, desc: "Cộng điểm tích cực" },
+            { id: 38, group: "Hoạt Động Phong Trào", title: "Khen thưởng đột xuất từ Ban Giám Hiệu", type: "group", points: 10, isBonus: true, desc: "Cộng điểm thưởng BGH" }
+        ];
+
+        // State Storage Data Structure
+        // appData[weekKey][classId][criteriaId] = { count: 0, sttList: [] }
+        let appData = {};
+
+        // ==========================================
+        // 2. INITIALIZATION & STORAGE LOGIC
+        // ==========================================
 
         window.onload = function() {
-            localStorage.clear();
-            document.getElementById('weekSelect').value = "Tuần 05";
-            renderAll();
+            initWeekSelector();
+            initClassSelector();
+            loadStorageData();
+            
+            // Set initial state & render
+            changeWeekOrClass();
         };
 
-        function changeWeek() {
-            appState.currentWeek = document.getElementById('weekSelect').value;
-            renderAll();
-        }
+        function initWeekSelector() {
+            const weekSelect = document.getElementById('select-week');
+            const summaryWeekSelect = document.getElementById('summary-week-filter');
+            weekSelect.innerHTML = '';
+            summaryWeekSelect.innerHTML = '';
 
-        function renderAll() {
-            document.getElementById('lblWeekRank').innerText = appState.currentWeek;
-            document.getElementById('lockStatusBtn').innerHTML = isUnlocked ? '<i class="fa-solid fa-lock-open"></i> Đã Mở Khóa' : '<i class="fa-solid fa-lock"></i> BTC Khóa';
-            document.getElementById('lockBanner').style.display = isUnlocked ? 'none' : 'block';
-            renderRankings();
-            renderClassListWithViolations();
-        }
+            for (let i = 1; i <= 35; i++) {
+                const opt1 = document.createElement('option');
+                opt1.value = `Tuần ${i}`;
+                opt1.textContent = `Tuần ${i}`;
+                weekSelect.appendChild(opt1);
 
-        function calculateClassScore(clsData) {
-            if (!clsData) return 100;
-            let score = 100;
-            score += (clsData.tiet_tot || 0) * 10;
-            score -= (clsData.tiet_b || 0) * 3;
-            score -= (clsData.tiet_c || 0) * 10;
-            score -= (clsData.tiet_kd || 0) * 5;
-
-            if (clsData.violations) {
-                Object.values(clsData.violations).forEach(codesStr => {
-                    if (codesStr && typeof codesStr === 'string') {
-                        codesStr.trim().split(/-+/).forEach(c => {
-                            c = c.trim();
-                            if (RULES[c]) score += RULES[c].pts;
-                        });
-                    }
-                });
+                const opt2 = document.createElement('option');
+                opt2.value = `Tuần ${i}`;
+                opt2.textContent = `Tuần ${i}`;
+                summaryWeekSelect.appendChild(opt2);
             }
+        }
+
+        function initClassSelector() {
+            const classSelect = document.getElementById('select-class');
+            classSelect.innerHTML = '';
+
+            SAMPLE_CLASSES.forEach(cls => {
+                const opt = document.createElement('option');
+                opt.value = cls.id;
+                opt.textContent = `${cls.name} (${cls.block}) - Mã SBD: ${cls.sbdPrefix}xxx`;
+                classSelect.appendChild(opt);
+            });
+        }
+
+        function loadStorageData() {
+            const saved = localStorage.getItem('tktd_emulation_data');
+            if (saved) {
+                try {
+                    appData = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading storage', e);
+                    appData = {};
+                }
+            }
+        }
+
+        function saveStorageData() {
+            localStorage.setItem('tktd_emulation_data', JSON.stringify(appData));
+        }
+
+        // ==========================================
+        // 3. CORE LOGIC & CALCULATION
+        // ==========================================
+
+        function getSelectedWeek() {
+            return document.getElementById('select-week').value;
+        }
+
+        function getSelectedClassId() {
+            return document.getElementById('select-class').value;
+        }
+
+        function getClassInfo(classId) {
+            return SAMPLE_CLASSES.find(c => c.id === classId) || SAMPLE_CLASSES[0];
+        }
+
+        // Get or initialize record data for specific week and class
+        function getClassRecord(week, classId) {
+            if (!appData[week]) appData[week] = {};
+            if (!appData[week][classId]) appData[week][classId] = {};
+            return appData[week][classId];
+        }
+
+        // Calculate score for a class in a week
+        function calculateClassScore(week, classId) {
+            const record = getClassRecord(week, classId);
+            let score = 100; // Base score
+
+            CRITERIA_38.forEach(c => {
+                const entry = record[c.id];
+                if (entry) {
+                    if (c.type === 'group') {
+                        const count = entry.count || 0;
+                        score += count * c.points;
+                    } else if (c.type === 'individual') {
+                        const sttList = entry.sttList || [];
+                        score += sttList.length * c.points;
+                    }
+                }
+            });
+
             return score;
         }
 
-        function renderRankings() {
-            const weekData = appState.data[appState.currentWeek] || {};
+        // Helper to format SBD/STT Array (e.g., [1, 32, 13, 5] -> "01-05-13-32")
+        function formatSTTList(list) {
+            if (!list || list.length === 0) return "";
+            // Clean, format 2 digits, and sort
+            const formatted = list
+                .map(num => String(num).padStart(2, '0'))
+                .sort((a, b) => a.localeCompare(b));
+            return formatted.join('-');
+        }
 
-            [1, 2, 3].forEach(g => {
-                let list = (GROUPS[g] || []).map(cls => {
-                    const info = weekData[cls] || { score: 100, late: false };
-                    const score = calculateClassScore(info);
-                    const isPenalized = score < 0 || info.late;
-                    return { cls, score, late: info.late, isPenalized };
-                });
+        // Helper to parse text input into array of STT numbers
+        function parseInputToSTTArray(text) {
+            if (!text || text.trim() === '') return [];
+            // Split by dash, comma, space, semicolon
+            const parts = text.split(/[-,\s;]+/);
+            const result = [];
 
-                list.sort((a, b) => {
-                    if (a.isPenalized && !b.isPenalized) return 1;
-                    if (!a.isPenalized && b.isPenalized) return -1;
-                    return b.score - a.score;
-                });
+            parts.forEach(p => {
+                const clean = p.trim();
+                if (clean !== '' && !isNaN(clean)) {
+                    const num = parseInt(clean, 10);
+                    if (num >= 1 && num <= 99) {
+                        result.push(num);
+                    }
+                }
+            });
+            return result;
+        }
 
-                const container = document.getElementById(`group${g}-list`);
-                if (container) {
-                    if (list.length === 0) {
-                        container.innerHTML = '<div class="p-3 text-xs text-slate-400 italic text-center">Chưa có lớp nhóm này</div>';
+        // ==========================================
+        // 4. UI RENDER FUNCTIONS
+        // ==========================================
+
+        function changeWeekOrClass() {
+            const week = getSelectedWeek();
+            const classId = getSelectedClassId();
+            const classObj = getClassInfo(classId);
+
+            // Update Header Displays
+            document.getElementById('current-group-label').textContent = classObj.block;
+            document.getElementById('print-week-title').textContent = week;
+            document.getElementById('print-class-title').textContent = classObj.name;
+
+            // Render criteria input form
+            renderCriteriaForm(week, classId);
+
+            // Update scores and rank
+            updateScoreAndBadgeDisplay(week, classId);
+
+            // Sync Summary tab if active
+            renderSummaryTable();
+        }
+
+        function updateScoreAndBadgeDisplay(week, classId) {
+            const currentScore = calculateClassScore(week, classId);
+            document.getElementById('current-score-display').textContent = currentScore;
+            document.getElementById('print-score-title').textContent = currentScore;
+
+            // Calculate rank inside its block/group
+            const classObj = getClassInfo(classId);
+            const blockClasses = SAMPLE_CLASSES.filter(c => c.block === classObj.block);
+            
+            // Map scores
+            const scores = blockClasses.map(c => ({
+                id: c.id,
+                score: calculateClassScore(week, c.id)
+            })).sort((a, b) => b.score - a.score);
+
+            const rank = scores.findIndex(item => item.id === classId) + 1;
+            document.getElementById('current-rank-badge').textContent = `Hạng Khối: ${rank}`;
+        }
+
+        function renderCriteriaForm(week, classId) {
+            const container = document.getElementById('criteria-list-container');
+            container.innerHTML = '';
+
+            const record = getClassRecord(week, classId);
+            const classObj = getClassInfo(classId);
+
+            // Group criteria by group name
+            const groups = ["Học Tập", "Nền Nếp & Kỷ Luật", "Vệ Sinh & Lao Động", "Hoạt Động Phong Trào"];
+
+            groups.forEach(groupName => {
+                const groupItems = CRITERIA_38.filter(c => c.group === groupName);
+                if (groupItems.length === 0) return;
+
+                // Group Wrapper
+                const groupEl = document.createElement('div');
+                groupEl.className = "bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm";
+
+                // Group Header
+                let iconClass = "fa-book";
+                if (groupName.includes("Nền Nếp")) iconClass = "fa-user-shield";
+                if (groupName.includes("Vệ Sinh")) iconClass = "fa-broom";
+                if (groupName.includes("Phong Trào")) iconClass = "fa-flag";
+
+                groupEl.innerHTML = `
+                    <div class="bg-slate-200/80 px-4 py-2.5 font-extrabold text-slate-800 text-sm flex items-center justify-between border-b border-slate-300">
+                        <span class="flex items-center gap-2"><i class="fa-solid ${iconClass} text-indigo-700"></i> ${groupName}</span>
+                        <span class="text-xs font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-full border">${groupItems.length} Tiêu chí</span>
+                    </div>
+                    <div class="divide-y divide-slate-200 bg-white"></div>
+                `;
+
+                const listBody = groupEl.querySelector('.divide-y');
+
+                groupItems.forEach(item => {
+                    const itemData = record[item.id] || { count: 0, sttList: [] };
+                    const row = document.createElement('div');
+                    row.className = "p-3.5 sm:p-4 hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+
+                    // Points Badge
+                    const badgeColor = item.isBonus 
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-300" 
+                        : "bg-rose-100 text-rose-800 border-rose-300";
+                    const pointsText = item.isBonus ? `+${item.points} đ` : `${item.points} đ`;
+
+                    let inputControlsHtml = "";
+
+                    if (item.type === 'group') {
+                        // GROUP TYPE: COUNT CONTROLLER
+                        const count = itemData.count || 0;
+                        inputControlsHtml = `
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-slate-500 mr-2">Số lượng:</span>
+                                <button onclick="updateGroupCount('${week}', '${classId}', ${item.id}, -1)" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 font-bold text-slate-700 flex items-center justify-center transition active:scale-95 no-print">-</button>
+                                <input type="number" min="0" value="${count}" onchange="setGroupCount('${week}', '${classId}', ${item.id}, this.value)" class="w-14 text-center font-bold text-base border border-slate-300 rounded-lg p-1 focus:ring-2 focus:ring-indigo-500">
+                                <button onclick="updateGroupCount('${week}', '${classId}', ${item.id}, 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-bold text-white flex items-center justify-center transition active:scale-95 shadow-sm no-print">+</button>
+                            </div>
+                        `;
                     } else {
-                        container.innerHTML = list.map((item, idx) => `
-                            <div class="px-3 py-2 flex items-center justify-between text-xs hover:bg-slate-50">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-bold text-slate-400 w-4">${idx + 1}</span>
-                                    <span class="font-bold text-slate-800">Lớp ${item.cls}</span>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-bold ${item.score < 0 ? 'text-red-600' : 'text-blue-700'}">${item.score} đ</span>
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${item.isPenalized ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
-                                        ${item.late ? 'Trễ SĐB' : item.score < 0 ? 'Điểm Âm' : `Hạng ${idx + 1}`}
+                        // INDIVIDUAL TYPE: SBD / STT INPUT
+                        const formattedText = formatSTTList(itemData.sttList || []);
+                        const countViolations = (itemData.sttList || []).length;
+
+                        inputControlsHtml = `
+                            <div class="w-full sm:w-auto flex-grow max-w-md">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[11px] font-bold text-slate-500">
+                                        Mã STT (2 chữ số cuối SBD ${classObj.sbdPrefix}xxx):
+                                    </span>
+                                    <span class="text-xs font-bold ${countViolations > 0 ? 'text-rose-600 bg-rose-50 px-2 py-0.5 rounded' : 'text-slate-400'}">
+                                        Tổng: ${countViolations} lượt
                                     </span>
                                 </div>
+                                <div class="relative">
+                                    <input type="text" 
+                                        value="${formattedText}" 
+                                        placeholder="VD: 01-32-13-05 (Gõ số cách nhau)" 
+                                        onblur="handleIndividualInput('${week}', '${classId}', ${item.id}, this.value)"
+                                        onkeyup="if(event.key==='Enter') handleIndividualInput('${week}', '${classId}', ${item.id}, this.value)"
+                                        class="w-full font-mono font-bold text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+                                    />
+                                </div>
+                                <div class="mt-1 flex flex-wrap gap-1 no-print">
+                                    <span class="text-[10px] text-slate-400">Gợi ý thêm nhanh:</span>
+                                    <button onclick="quickAddSTT('${week}', '${classId}', ${item.id}, '25')" class="text-[10px] bg-slate-200 hover:bg-indigo-100 text-slate-700 hover:text-indigo-800 px-1.5 py-0.5 rounded transition">+25 (STT 25)</button>
+                                    <button onclick="quickAddSTT('${week}', '${classId}', ${item.id}, '26')" class="text-[10px] bg-slate-200 hover:bg-indigo-100 text-slate-700 hover:text-indigo-800 px-1.5 py-0.5 rounded transition">+26 (STT 26)</button>
+                                    <button onclick="clearSTT('${week}', '${classId}', ${item.id})" class="text-[10px] bg-rose-100 text-rose-700 hover:bg-rose-200 px-1.5 py-0.5 rounded transition ml-auto">Xóa tất cả</button>
+                                </div>
                             </div>
-                        `).join('');
-                    }
-                }
-            });
-        }
-
-        function toggleStudentList(cls) {
-            const listEl = document.getElementById(`studentList_${cls}`);
-            const iconEl = document.getElementById(`icon_${cls}`);
-            if (listEl) {
-                if (listEl.style.display === 'none') {
-                    listEl.style.display = 'block';
-                    if (iconEl) iconEl.className = 'fa-solid fa-chevron-up text-red-600';
-                } else {
-                    listEl.style.display = 'none';
-                    if (iconEl) iconEl.className = 'fa-solid fa-chevron-down text-slate-400';
-                }
-            }
-        }
-
-        function renderClassListWithViolations() {
-            const container = document.getElementById('classListContainer');
-            const weekData = appState.data[appState.currentWeek] || {};
-            let html = '';
-
-            const allActiveClasses = ["10A1", "10A2", "10A3"];
-
-            allActiveClasses.forEach(cls => {
-                const clsInfo = weekData[cls] || { tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} };
-                const score = calculateClassScore(clsInfo);
-                const students = CLASS_STUDENTS[cls] || [];
-                const violationsMap = clsInfo.violations || {};
-
-                let studentListHTML = '';
-
-                students.forEach((stObj) => {
-                    const stSBD = stObj.sbd;
-                    const stName = stObj.hoTen;
-                    const twoDigits = stSBD.slice(-2); // Lấy 2 số cuối SBD
-
-                    const codes = violationsMap[stSBD] || violationsMap[stName];
-                    let violationBadge = '';
-
-                    if (codes && typeof codes === 'string' && codes.trim() !== '') {
-                        violationBadge = codes.trim().split(/-+/).map(c => {
-                            c = c.trim();
-                            return RULES[c] ? `<span class="bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded text-[10px] ml-1">[Mã ${c}] ${RULES[c].text} (${RULES[c].pts > 0 ? '+' : ''}${RULES[c].pts}đ)</span>` : `<span class="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-[10px] ml-1">[Mã ${c}]</span>`;
-                        }).join(' ');
+                        `;
                     }
 
-                    studentListHTML += `
-                        <div class="flex items-center justify-between py-1.5 px-2 border-b border-slate-100 text-xs hover:bg-slate-100">
-                            <div class="flex items-center space-x-2">
-                                <span class="font-bold text-slate-400 text-[11px] bg-slate-200 px-1.5 py-0.5 rounded">${twoDigits}</span>
-                                <span class="text-slate-700 font-medium">${stName}</span>
+                    row.innerHTML = `
+                        <div class="flex items-start gap-3 flex-grow">
+                            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded w-8 text-center shrink-0">${item.id}</span>
+                            <div>
+                                <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    ${item.title}
+                                    <span class="text-xs px-2 py-0.5 rounded-full border font-extrabold ${badgeColor}">${pointsText}</span>
+                                </div>
+                                <div class="text-xs text-slate-500 mt-0.5">${item.desc}</div>
                             </div>
-                            <div>${violationBadge ? violationBadge : '<span class="text-emerald-600 text-[11px]"><i class="fa-solid fa-check"></i> Tốt</span>'}</div>
+                        </div>
+                        <div class="shrink-0 w-full sm:w-auto">
+                            ${inputControlsHtml}
                         </div>
                     `;
+
+                    listBody.appendChild(row);
                 });
 
-                html += `
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div class="p-3.5 bg-white flex items-center justify-between border-b">
-                            <div onclick="toggleStudentList('${cls}')" class="flex items-center space-x-2 cursor-pointer select-none">
-                                <span class="font-bold text-sm text-slate-800">Lớp ${cls}</span>
-                                <span class="text-xs font-bold px-2 py-0.5 rounded ${score < 0 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${score} điểm</span>
-                                ${clsInfo.late ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">Nộp trễ SĐB</span>' : ''}
-                                <i id="icon_${cls}" class="fa-solid fa-chevron-down text-slate-400 text-xs ml-1"></i>
-                            </div>
-
-                            <button type="button" onclick="openInputModal('${cls}')" class="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-lg border border-red-200 transition flex items-center gap-1 shadow-sm cursor-pointer">
-                                <i class="fa-solid fa-pen-to-square"></i> Nhập Lỗi
-                            </button>
-                        </div>
-
-                        <div id="studentList_${cls}" style="display: none;" class="p-3 bg-slate-50 space-y-1 max-h-[350px] overflow-y-auto">
-                            ${studentListHTML}
-                        </div>
-                    </div>
-                `;
+                container.appendChild(groupEl);
             });
-
-            container.innerHTML = html;
         }
 
-        function openInputModal(cls) {
-            if (!isUnlocked) {
-                alert("Hệ thống đang khóa! Vui lòng bấm BTC Khóa góc trên để mở quyền chỉnh sửa.");
-                openAdminModal();
-                return;
+        // ==========================================
+        // 5. INPUT EVENT HANDLERS
+        // ==========================================
+
+        function updateGroupCount(week, classId, criteriaId, delta) {
+            const record = getClassRecord(week, classId);
+            if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
+
+            let current = record[criteriaId].count || 0;
+            current = Math.max(0, current + delta);
+            record[criteriaId].count = current;
+
+            saveStorageData();
+            changeWeekOrClass();
+        }
+
+        function setGroupCount(week, classId, criteriaId, value) {
+            const record = getClassRecord(week, classId);
+            if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
+
+            let val = parseInt(value, 10);
+            if (isNaN(val) || val < 0) val = 0;
+
+            record[criteriaId].count = val;
+
+            saveStorageData();
+            changeWeekOrClass();
+        }
+
+        function handleIndividualInput(week, classId, criteriaId, rawValue) {
+            const record = getClassRecord(week, classId);
+            if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
+
+            const sttArray = parseInputToSTTArray(rawValue);
+            record[criteriaId].sttList = sttArray;
+
+            saveStorageData();
+            changeWeekOrClass();
+            showToast("Đã cập nhật danh sách vi phạm cá nhân");
+        }
+
+        function quickAddSTT(week, classId, criteriaId, sttStr) {
+            const record = getClassRecord(week, classId);
+            if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
+
+            const num = parseInt(sttStr, 10);
+            if (!record[criteriaId].sttList.includes(num)) {
+                record[criteriaId].sttList.push(num);
             }
 
-            currentActiveEditClass = cls;
-            document.getElementById('modalTitle').innerText = `Nhập Vi Phạm - Lớp ${cls} (${appState.currentWeek})`;
-
-            const weekData = appState.data[appState.currentWeek] || {};
-            const clsInfo = weekData[cls] || { tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} };
-
-            document.getElementById('m_inp_tiet_tot').value = clsInfo.tiet_tot || 0;
-            document.getElementById('m_inp_tiet_b').value = clsInfo.tiet_b || 0;
-            document.getElementById('m_inp_tiet_c').value = clsInfo.tiet_c || 0;
-            document.getElementById('m_inp_tiet_kd').value = clsInfo.tiet_kd || 0;
-            document.getElementById('m_inp_tre_sdb').checked = !!clsInfo.late;
-
-            const students = CLASS_STUDENTS[cls] || [];
-            const container = document.getElementById('modalStudentList');
-
-            container.innerHTML = students.map((stObj, i) => {
-                const stSBD = stObj.sbd;
-                const twoDigits = stSBD.slice(-2);
-                const stName = stObj.hoTen;
-                const val = (clsInfo.violations && clsInfo.violations[stSBD]) ? clsInfo.violations[stSBD] : '';
-
-                return `
-                    <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
-                        <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold text-slate-700"><span class="bg-red-100 text-red-700 px-1 py-0.5 rounded mr-1">${twoDigits}</span>${stName}</span>
-                            <span id="m_st_desc_${i}" class="text-[10px] text-red-600 font-medium italic"></span>
-                        </div>
-                        <input type="text" id="m_st_code_${i}" data-sbd="${stSBD}" value="${val}" oninput="parseModalStudentCode(${i})" placeholder="Ví dụ: 14-15-27" class="w-full border rounded px-2 py-1 text-xs font-bold uppercase text-slate-800 focus:outline-none focus:border-red-500">
-                    </div>
-                `;
-            }).join('');
-
-            students.forEach((_, i) => parseModalStudentCode(i));
-            document.getElementById('inputModal').style.display = 'flex';
+            saveStorageData();
+            changeWeekOrClass();
+            showToast(`Đã thêm STT ${sttStr}`);
         }
 
-        function parseModalStudentCode(index) {
-            const el = document.getElementById(`m_st_code_${index}`);
-            if (!el) return;
-            const val = el.value.trim();
-            const descEl = document.getElementById(`m_st_desc_${index}`);
-            if (!val) { descEl.innerText = ""; return; }
-
-            const codes = val.split(/-+/);
-            let parsedText = [];
-            codes.forEach(c => {
-                c = c.trim();
-                if (RULES[c]) parsedText.push(RULES[c].text);
-            });
-            descEl.innerText = parsedText.length > 0 ? parsedText.join(", ") : "Mã không có";
+        function clearSTT(week, classId, criteriaId) {
+            const record = getClassRecord(week, classId);
+            if (record[criteriaId]) {
+                record[criteriaId].sttList = [];
+            }
+            saveStorageData();
+            changeWeekOrClass();
         }
 
-        function closeInputModal() {
-            document.getElementById('inputModal').style.display = 'none';
-        }
-
-        function saveModalData() {
-            if (!currentActiveEditClass) return;
-            const cls = currentActiveEditClass;
-
-            if (!appState.data[appState.currentWeek]) appState.data[appState.currentWeek] = {};
-
-            const students = CLASS_STUDENTS[cls] || [];
-            let violationsMap = {};
-
-            students.forEach((stObj, i) => {
-                const inputEl = document.getElementById(`m_st_code_${i}`);
-                if (inputEl) {
-                    const val = inputEl.value.trim();
-                    if (val) violationsMap[stObj.sbd] = val;
+        function clearCurrentClassData() {
+            const week = getSelectedWeek();
+            const classId = getSelectedClassId();
+            if (confirm(`Bạn có chắc chắn muốn xóa toàn bộ dữ liệu chấm điểm của ${classId} trong ${week}?`)) {
+                if (appData[week] && appData[week][classId]) {
+                    appData[week][classId] = {};
+                    saveStorageData();
+                    changeWeekOrClass();
+                    showToast("Đã xóa dữ liệu lớp thành công!");
                 }
+            }
+        }
+
+        // ==========================================
+        // 6. TAB 2: SUMMARY & RANKING RENDER
+        // ==========================================
+
+        function renderSummaryTable() {
+            const week = document.getElementById('summary-week-filter').value || getSelectedWeek();
+            document.getElementById('summary-current-week-label').textContent = week;
+
+            const groupsContainer = document.getElementById('summary-groups-container');
+            groupsContainer.innerHTML = '';
+
+            const allTableBody = document.getElementById('all-classes-tbody');
+            allTableBody.innerHTML = '';
+
+            // Group classes by Block
+            const blocks = ["Khối 10", "Khối 11", "Khối 12"];
+
+            let allClassRankings = [];
+
+            blocks.forEach(blockName => {
+                const blockClasses = SAMPLE_CLASSES.filter(c => c.block === blockName);
+
+                // Calculate scores for each class in block
+                const classScores = blockClasses.map(cls => {
+                    const score = calculateClassScore(week, cls.id);
+                    return {
+                        ...cls,
+                        score: score
+                    };
+                });
+
+                // Sort descending by score
+                classScores.sort((a, b) => b.score - a.score);
+
+                // Assign block rank
+                classScores.forEach((item, index) => {
+                    item.blockRank = index + 1;
+                    item.titleStatus = getTitleBadge(item.score);
+                    allClassRankings.push(item);
+                });
+
+                // Render Block Summary Card
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-box flex flex-col";
+
+                let blockBg = "bg-indigo-700";
+                if (blockName === "Khối 11") blockBg = "bg-blue-700";
+                if (blockName === "Khối 12") blockBg = "bg-emerald-700";
+
+                card.innerHTML = `
+                    <div class="${blockBg} text-white p-4 font-extrabold text-base flex justify-between items-center">
+                        <span><i class="fa-solid fa-users text-yellow-300 mr-2"></i> ${blockName}</span>
+                        <span class="text-xs bg-black/20 px-2.5 py-1 rounded-full font-semibold">${classScores.length} Lớp thi đua</span>
+                    </div>
+                    <div class="p-4 flex-grow divide-y divide-slate-100">
+                        ${classScores.map(cls => `
+                            <div class="py-3 flex items-center justify-between">
+                                <div>
+                                    <div class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                                        ${cls.name}
+                                        <span class="text-[10px] font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">SBD ${cls.sbdPrefix}xxx</span>
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5">${cls.titleStatus.label}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-black text-indigo-700">${cls.score} <span class="text-xs text-slate-400 font-normal">đ</span></div>
+                                    <div class="text-xs font-bold text-amber-600">Hạng ${cls.blockRank}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                groupsContainer.appendChild(card);
             });
 
-            appState.data[appState.currentWeek][cls] = {
-                tiet_tot: parseInt(document.getElementById('m_inp_tiet_tot').value) || 0,
-                tiet_b: parseInt(document.getElementById('m_inp_tiet_b').value) || 0,
-                tiet_c: parseInt(document.getElementById('m_inp_tiet_c').value) || 0,
-                tiet_kd: parseInt(document.getElementById('m_inp_tiet_kd').value) || 0,
-                late: document.getElementById('m_inp_tre_sdb').checked,
-                violations: violationsMap
-            };
+            // Sort overall school rankings
+            allClassRankings.sort((a, b) => b.score - a.score);
 
-            renderAll();
-            closeInputModal();
-            alert(`Đã lưu dữ liệu Lớp ${cls} thành công!`);
+            // Populate Overall School Table
+            allClassRankings.forEach((cls, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                let medal = `<span class="font-bold text-slate-500">${idx + 1}</span>`;
+                if (idx === 0) medal = `<i class="fa-solid fa-medal text-yellow-500 text-base"></i>`;
+                if (idx === 1) medal = `<i class="fa-solid fa-medal text-slate-400 text-base"></i>`;
+                if (idx === 2) medal = `<i class="fa-solid fa-medal text-amber-700 text-base"></i>`;
+
+                tr.innerHTML = `
+                    <td class="p-3.5 text-center font-bold">${medal}</td>
+                    <td class="p-3.5 font-semibold text-slate-600">${cls.block}</td>
+                    <td class="p-3.5 font-extrabold text-slate-800">${cls.name}</td>
+                    <td class="p-3.5 font-mono text-xs text-slate-500">${cls.sbdPrefix}001 - ${cls.sbdPrefix}050</td>
+                    <td class="p-3.5 text-center font-black text-indigo-700 text-base">${cls.score}</td>
+                    <td class="p-3.5 text-center font-bold text-slate-700">Hạng ${cls.blockRank}</td>
+                    <td class="p-3.5 text-center">${cls.titleStatus.badgeHtml}</td>
+                `;
+
+                allTableBody.appendChild(tr);
+            });
+
+            // Generate Copyable Report Text
+            generateTextReport(week, allClassRankings);
         }
 
-        function openAdminModal() {
-            document.getElementById('adminPassInput').value = '';
-            document.getElementById('adminModal').style.display = 'flex';
-            setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').style.display = 'none';
-        }
-
-        function handleAdminSubmit(e) {
-            e.preventDefault();
-            const inputPass = document.getElementById('adminPassInput').value.trim();
-            if (inputPass === ADMIN_PASS) {
-                isUnlocked = true;
-                renderAll();
-                closeAdminModal();
+        function getTitleBadge(score) {
+            if (score >= 95) {
+                return {
+                    label: "Xuất Sắc",
+                    badgeHtml: `<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full border border-emerald-300">★ Xuất Sắc</span>`
+                };
+            } else if (score >= 85) {
+                return {
+                    label: "Tốt",
+                    badgeHtml: `<span class="px-2.5 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full border border-blue-300">Tốt</span>`
+                };
+            } else if (score >= 70) {
+                return {
+                    label: "Khá",
+                    badgeHtml: `<span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full border border-amber-300">Khá</span>`
+                };
             } else {
-                alert("Mật khẩu Admin không chính xác!");
+                return {
+                    label: "Cần Cố Gắng",
+                    badgeHtml: `<span class="px-2.5 py-1 bg-rose-100 text-rose-800 font-bold text-xs rounded-full border border-rose-300">Cần Cố Gắng</span>`
+                };
             }
+        }
+
+        function generateTextReport(week, rankings) {
+            let report = `=== BÁO CÁO TỔNG KẾT THI ĐỦA ${week.toUpperCase()} ===\n\n`;
+            
+            rankings.forEach((cls) => {
+                report += `• ${cls.name} (${cls.block}): ${cls.score} điểm - Xếp Hạng Khối: ${cls.blockRank} - Danh hiệu: ${cls.titleStatus.label}\n`;
+            });
+
+            report += `\nNguồn: Hệ thống Chấm điểm Thi đua TKTĐ`;
+            document.getElementById('text-report-area').value = report;
+        }
+
+        function copyReportText() {
+            const copyText = document.getElementById("text-report-area");
+            copyText.select();
+            document.execCommand("copy");
+            showToast("Đã sao chép báo cáo vào bộ nhớ tạm!");
+        }
+
+        // ==========================================
+        // 7. TAB NAVIGATION & UTILITIES
+        // ==========================================
+
+        function switchTab(tabName) {
+            const inputTab = document.getElementById('tab-input');
+            const summaryTab = document.getElementById('tab-summary');
+            const guideTab = document.getElementById('tab-guide');
+
+            const btnInput = document.getElementById('tab-btn-input');
+            const btnSummary = document.getElementById('tab-btn-summary');
+            const btnGuide = document.getElementById('tab-btn-guide');
+
+            // Reset tab button styles
+            [btnInput, btnSummary, btnGuide].forEach(btn => {
+                btn.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+            });
+
+            // Hide tabs
+            inputTab.classList.add('hidden');
+            summaryTab.classList.add('hidden');
+            guideTab.classList.add('hidden');
+
+            if (tabName === 'input') {
+                inputTab.classList.remove('hidden');
+                btnInput.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
+            } else if (tabName === 'summary') {
+                summaryTab.classList.remove('hidden');
+                btnSummary.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
+                renderSummaryTable();
+            } else if (tabName === 'guide') {
+                guideTab.classList.remove('hidden');
+                btnGuide.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
+            }
+        }
+
+        function resetDataPrompt() {
+            if (confirm("Bạn có chắc chắn muốn đặt lại toàn bộ dữ liệu ứng dụng về mặc định?")) {
+                localStorage.removeItem('tktd_emulation_data');
+                appData = {};
+                changeWeekOrClass();
+                showToast("Đã khôi phục dữ liệu ban đầu!");
+            }
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `TKTD_ThiDua_Data_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Đã xuất file dữ liệu thành công!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = message;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
     </script>
 </body>
