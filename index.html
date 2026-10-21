@@ -1,277 +1,229 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Chấm Điểm & Tổng Kết Thi Đua Hàng Tuần (TKTĐ)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sổ Chấm Điểm Thi Đua TKTĐ Mobile</title>
+
+    <!-- PWA / Mobile Web App Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e1b4b">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Custom scrollbar for better UI */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white !important; font-size: 11pt; }
-            .card-box { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col pb-20 select-none transition-colors duration-200">
 
-    <!-- TOP HEADER -->
-    <header class="bg-gradient-to-r from-blue-900 via-indigo-800 to-blue-900 text-white shadow-md sticky top-0 z-50 no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="bg-yellow-400 text-blue-950 p-2 rounded-xl shadow-inner font-black text-xl">
+    <!-- COMPACT MOBILE HEADER -->
+    <header class="bg-indigo-950 dark:bg-slate-950 text-white sticky top-0 z-50 shadow-md pt-safe">
+        <div class="px-3 py-2.5 flex items-center justify-between gap-2 max-w-lg mx-auto">
+            <div class="flex items-center space-x-2">
+                <div class="bg-amber-400 text-indigo-950 w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shadow">
                     <i class="fa-solid fa-trophy"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg sm:text-xl tracking-wide uppercase leading-tight">SỔ CHẤM ĐIỂM THI ĐỦA TKTĐ</h1>
-                    <p class="text-xs text-blue-200 font-medium">Hệ thống quản lý & đánh giá thi đua học sinh hàng tuần</p>
+                    <h1 class="font-extrabold text-sm tracking-tight leading-none uppercase">TKTĐ Mobile</h1>
+                    <!-- Auto-save Indicator -->
+                    <div id="save-status" class="text-[10px] text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
+                        <i class="fa-solid fa-cloud-arrow-up text-[9px]"></i> <span>Đã tự động lưu</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Quick Info & Reset Header Tools -->
-            <div class="flex items-center space-x-2 text-xs sm:text-sm">
-                <button onclick="resetDataPrompt()" class="px-3 py-1.5 bg-blue-950/60 hover:bg-red-600 rounded-lg text-blue-100 hover:text-white transition flex items-center gap-1.5 border border-blue-700/50">
-                    <i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">Đặt Lại Ban Đầu</span>
+            <!-- Top Header Actions -->
+            <div class="flex items-center gap-1">
+                <button onclick="toggleDarkMode()" title="Đổi giao diện" class="p-2 text-slate-300 hover:text-white rounded-lg active:bg-white/10 text-xs">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
                 </button>
-                <button onclick="exportJSON()" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 rounded-lg text-white transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-file-export"></i> <span class="hidden sm:inline">Xuất File</span>
+                <button onclick="openMenuModal()" title="Cài đặt & Dữ liệu" class="p-2 text-slate-300 hover:text-white rounded-lg active:bg-white/10 text-xs">
+                    <i class="fa-solid fa-ellipsis-vertical text-base"></i>
                 </button>
-                <button onclick="window.print()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-semibold transition flex items-center gap-1.5 shadow">
-                    <i class="fa-solid fa-print"></i> <span>In Báo Cáo</span>
-                </button>
+            </div>
+        </div>
+
+        <!-- QUICK SELECTOR STRIP (STEP 1 & STEP 2) -->
+        <div class="bg-indigo-900/90 dark:bg-slate-900 px-3 py-2 border-t border-indigo-800/50 dark:border-slate-800">
+            <div class="max-w-lg mx-auto grid grid-cols-2 gap-2">
+                <!-- Select Week -->
+                <div class="relative">
+                    <label class="block text-[9px] font-bold uppercase text-indigo-200 dark:text-slate-400 mb-0.5">1. Chọn Tuần</label>
+                    <select id="select-week" onchange="onWeekOrClassChange()" class="w-full bg-indigo-950/80 dark:bg-slate-800 text-white font-bold text-xs rounded-lg border border-indigo-700/60 dark:border-slate-700 p-2 pr-6 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-400">
+                        <!-- Populated dynamically -->
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-2.5 bottom-2.5 text-[10px] text-indigo-300 pointer-events-none"></i>
+                </div>
+
+                <!-- Select Class -->
+                <div class="relative">
+                    <label class="block text-[9px] font-bold uppercase text-indigo-200 dark:text-slate-400 mb-0.5">2. Chọn Lớp Thi Đua</label>
+                    <select id="select-class" onchange="onWeekOrClassChange()" class="w-full bg-indigo-950/80 dark:bg-slate-800 text-white font-bold text-xs rounded-lg border border-indigo-700/60 dark:border-slate-700 p-2 pr-6 appearance-none focus:outline-none focus:ring-1 focus:ring-amber-400">
+                        <!-- Populated dynamically -->
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-2.5 bottom-2.5 text-[10px] text-indigo-300 pointer-events-none"></i>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- NAVIGATION TABS -->
-    <div class="bg-white border-b border-slate-200 shadow-sm sticky top-[60px] z-40 no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-2 py-2">
-            <button id="tab-btn-input" onclick="switchTab('input')" class="px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md">
-                <i class="fa-solid fa-pen-to-square"></i> 1. Nhập Điểm Lớp Chi Tiết
-            </button>
-            <button id="tab-btn-summary" onclick="switchTab('summary')" class="px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
-                <i class="fa-solid fa-chart-line"></i> 2. Bảng Tổng Kết Thi Đua (3 Khối)
-            </button>
-            <button id="tab-btn-guide" onclick="switchTab('guide')" class="px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 text-slate-600 hover:bg-slate-100">
-                <i class="fa-solid fa-circle-info"></i> Quy Định Mã SBD & Tiêu Chí
-            </button>
+    <!-- SCORE SCOREBOARD BANNER (COMPACT STICKY UNDER HEADER) -->
+    <div id="score-banner" class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm px-4 py-2.5 sticky top-[89px] z-40 transition-colors">
+        <div class="max-w-lg mx-auto flex items-center justify-between">
+            <div>
+                <div class="flex items-center gap-1.5">
+                    <span id="banner-class-name" class="font-extrabold text-slate-900 dark:text-white text-base">Lớp 10A6</span>
+                    <span id="banner-sbd-prefix" class="text-[10px] bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-mono font-bold px-1.5 py-0.5 rounded">SBD 106xxx</span>
+                </div>
+                <div id="banner-block-name" class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Khối 10 • Điểm khởi điểm: 100 đ</div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <div id="banner-score" class="text-2xl font-black text-indigo-600 dark:text-indigo-400 leading-none">100</div>
+                    <div class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400 mt-0.5">Điểm Tuần</div>
+                </div>
+                <div id="banner-rank-badge" class="px-2.5 py-1 bg-amber-400 text-amber-950 text-xs font-black rounded-lg shadow-sm">
+                    Hạng 1
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+    <!-- MAIN APP CONTENT -->
+    <main class="max-w-lg mx-auto w-full px-3 pt-3 flex-grow">
 
-        <!-- TAB 1: INPUT TAB -->
-        <div id="tab-input" class="space-y-6">
+        <!-- TAB 1: CRITERIA INPUT TAB -->
+        <div id="tab-input" class="space-y-3">
             
-            <!-- STEP 1 & STEP 2 SELECTORS BAR -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 card-box no-print">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                    
-                    <!-- BƯỚC 1: CHỌN TUẦN -->
-                    <div class="md:col-span-4">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1.5 flex items-center gap-1.5">
-                            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">1</span>
-                            BƯỚC 1: Chọn Tuần Học
-                        </label>
-                        <select id="select-week" onchange="changeWeekOrClass()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-bold text-base rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 cursor-pointer shadow-sm">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-
-                    <!-- BƯỚC 2: CHỌN LỚP (MẪU 3 LỚP) -->
-                    <div class="md:col-span-5">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-700 mb-1.5 flex items-center gap-1.5">
-                            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">2</span>
-                            BƯỚC 2: Chọn Lớp Thi Đua Mẫu
-                        </label>
-                        <select id="select-class" onchange="changeWeekOrClass()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 font-bold text-base rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 cursor-pointer shadow-sm">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-
-                    <!-- CURRENT CLASS QUICK STATUS DISPLAY -->
-                    <div class="md:col-span-3 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-3 flex items-center justify-between shadow-inner">
-                        <div>
-                            <span class="text-xs text-indigo-600 font-bold block uppercase tracking-wide">Điểm Lớp Hiện Tại</span>
-                            <div class="flex items-baseline gap-1">
-                                <span id="current-score-display" class="text-3xl font-extrabold text-indigo-700">100</span>
-                                <span class="text-xs font-semibold text-slate-500">/ 100 điểm ban đầu</span>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span id="current-rank-badge" class="inline-block px-3 py-1 bg-amber-400 text-amber-950 font-black text-xs rounded-full shadow-sm mb-1">
-                                Hạng: 1
-                            </span>
-                            <div id="current-group-label" class="text-[11px] font-semibold text-slate-500">Khối 10</div>
-                        </div>
-                    </div>
-
+            <!-- SEARCH / FILTER CRITERIA BAR -->
+            <div class="flex items-center gap-2">
+                <div class="relative flex-grow">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                    <input type="text" id="criteria-search" oninput="filterCriteriaList()" placeholder="Tìm nhanh tiêu chí (VD: đi trễ, điểm tốt...)" class="w-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-xs rounded-xl pl-8 pr-3 py-2 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
                 </div>
+                <button onclick="clearCurrentClassData()" title="Xóa nhập liệu lớp này" class="p-2 bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-900 text-xs font-bold flex items-center justify-center active:scale-95 transition">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
             </div>
 
-            <!-- PRINT HEADER INFORMATION (Only appears when printing) -->
-            <div class="hidden print-only text-center my-4 border-b pb-4">
-                <h2 class="text-xl font-bold uppercase">PHIẾU BÁO CHẤM ĐIỂM THI ĐỦA HÀNG TUẦN</h2>
-                <div class="text-sm font-semibold text-slate-700 mt-1">
-                    <span id="print-week-title">Tuần 1</span> - Lớp: <span id="print-class-title" class="text-indigo-800 font-extrabold">10A6</span> 
-                    (Mã SBD mẫu: 1060xx) - Tổng Điểm: <span id="print-score-title" class="font-extrabold">100</span>
-                </div>
+            <!-- CRITERIA LIST (MOBILE CARDS) -->
+            <div id="criteria-container" class="space-y-3">
+                <!-- Dynamically Rendered -->
             </div>
-
-            <!-- BƯỚC 3: HIỂN THỊ & NHẬP LIỆU 38 TIÊU CHÍ -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-box">
-                <!-- Card Header -->
-                <div class="bg-slate-800 text-white px-5 py-4 flex flex-wrap justify-between items-center gap-2">
-                    <div>
-                        <h2 class="font-extrabold text-base sm:text-lg flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-yellow-400"></i> BƯỚC 3: Danh Sách 38 Tiêu Chí Chấm Điểm
-                        </h2>
-                        <p class="text-xs text-slate-300">Điểm khởi điểm: 100 điểm. Lỗi tập thể nhập Số Lượng; Lỗi cá nhân nhập STT (2 số cuối SBD).</p>
-                    </div>
-                    <div class="flex items-center gap-2 no-print">
-                        <button onclick="clearCurrentClassData()" class="px-3 py-1.5 bg-slate-700 hover:bg-rose-600 text-xs font-semibold rounded-lg text-slate-200 hover:text-white transition">
-                            <i class="fa-solid fa-eraser"></i> Xóa Nhập Liệu Lớp Này
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Criteria Container Grouped -->
-                <div class="p-4 sm:p-6 space-y-8" id="criteria-list-container">
-                    <!-- Dynamic rendering via JavaScript -->
-                </div>
-            </div>
-
         </div>
 
-        <!-- TAB 2: SUMMARY TAB -->
-        <div id="tab-summary" class="space-y-6 hidden">
-            
-            <!-- Summary Header Controls -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 card-box flex flex-wrap justify-between items-center gap-4">
+        <!-- TAB 2: SUMMARY & RANKING TAB -->
+        <div id="tab-summary" class="space-y-4 hidden">
+            <!-- Week Summary Filter Header -->
+            <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
                 <div>
-                    <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-indigo-600"></i> BẢNG TỔNG KẾT THI ĐỦA THEO 3 NHÓM / KHỐI
+                    <h2 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-pie text-indigo-600 dark:text-indigo-400"></i> Bảng Xếp Hạng Thi Đua
                     </h2>
-                    <p class="text-xs text-slate-500">Tự động tính toán xếp hạng dựa trên tổng điểm thi đua của từng lớp theo tuần.</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Tổng hợp kết quả 3 Khối theo tuần</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <label for="summary-week-filter" class="text-xs font-bold uppercase text-slate-600">Chọn Tuần:</label>
-                    <select id="summary-week-filter" onchange="renderSummaryTable()" class="bg-slate-50 border border-slate-300 font-bold text-sm rounded-xl p-2 focus:ring-2 focus:ring-indigo-500">
-                        <!-- Populated dynamically -->
-                    </select>
+                <div class="text-xs font-extrabold bg-indigo-50 dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-xl" id="summary-week-badge">
+                    Tuần 1
                 </div>
             </div>
 
-            <!-- 3 GROUPS / BLOCKS SUMMARY CONTAINERS -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="summary-groups-container">
+            <!-- GROUPS SUMMARY CARDS -->
+            <div id="summary-groups-container" class="space-y-3">
                 <!-- Populated dynamically -->
             </div>
 
-            <!-- ALL CLASSES RANKING OVERVIEW TABLE -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-box">
-                <div class="p-4 bg-slate-800 text-white font-bold text-base flex justify-between items-center">
-                    <span><i class="fa-solid fa-list-ol text-yellow-400 mr-2"></i> BẢNG TỔNG HỢP XẾP HẠNG TOÀN TRƯỜNG</span>
-                    <span id="summary-current-week-label" class="text-xs bg-indigo-600 px-3 py-1 rounded-full">Tuần 1</span>
+            <!-- ALL CLASSES OVERVIEW LIST -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-4 py-3 bg-slate-800 text-white font-extrabold text-xs flex justify-between items-center">
+                    <span><i class="fa-solid fa-list-ol text-amber-400 mr-1.5"></i> TOÀN TRƯỜNG</span>
+                    <span class="text-[10px] font-normal text-slate-300">Xếp hạng theo tổng điểm</span>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                                <th class="p-3.5 text-center w-12">Hạng</th>
-                                <th class="p-3.5">Khối / Nhóm</th>
-                                <th class="p-3.5">Tên Lớp</th>
-                                <th class="p-3.5">Mã SBD Quy Định</th>
-                                <th class="p-3.5 text-center">Tổng Điểm</th>
-                                <th class="p-3.5 text-center">Xếp Hạng Khối</th>
-                                <th class="p-3.5 text-center">Đánh Giá Danh Hiệu</th>
-                            </tr>
-                        </thead>
-                        <tbody id="all-classes-tbody" class="divide-y divide-slate-200">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
+                <div id="all-classes-list" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
 
-            <!-- REPORT GENERATOR FOR COPYING/PRINTING -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 card-box no-print">
-                <h3 class="font-extrabold text-slate-800 text-base mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-list text-emerald-600"></i> Báo Cáo Thi Đua Nhanh (Dùng để copy gửi Zalo/Email)
-                </h3>
-                <textarea id="text-report-area" readonly class="w-full h-40 bg-slate-50 border border-slate-300 rounded-xl p-3 font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-3"></textarea>
-                <div class="flex justify-end">
-                    <button onclick="copyReportText()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-copy"></i> Sao Chép Báo Cáo
+            <!-- QUICK TEXT REPORT GENERATOR FOR ZALO -->
+            <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-emerald-600"></i> Báo Cáo Nhanh (Gửi Zalo/Sổ)
+                    </h3>
+                    <button onclick="copyReportText()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-lg shadow active:scale-95 transition flex items-center gap-1">
+                        <i class="fa-solid fa-copy"></i> Sao Chép
                     </button>
                 </div>
+                <textarea id="text-report-area" readonly class="w-full h-28 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-mono text-[11px] text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500"></textarea>
             </div>
-
         </div>
 
         <!-- TAB 3: GUIDE & SBD RULE TAB -->
-        <div id="tab-guide" class="space-y-6 hidden">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 card-box space-y-6">
-                <div>
-                    <h2 class="text-xl font-extrabold text-indigo-900 border-b pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-id-card text-indigo-600"></i> Hướng Dẫn Quy Tắc Mã Số Báo Danh (SBD) & STT Học Sinh
-                    </h2>
-                    <p class="text-sm text-slate-600 mt-2">
-                        Hệ thống sử dụng quy chuẩn mã SBD 6 chữ số đại diện cho từng lớp. Khi chấm vi phạm cá nhân, giám thị/sao đỏ chỉ cần nhập <strong>2 ký tự cuối (Số thứ tự học sinh)</strong>.
-                    </p>
-                </div>
+        <div id="tab-guide" class="space-y-3 hidden text-xs">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                <h2 class="font-extrabold text-sm text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5 border-b pb-2 border-slate-100 dark:border-slate-700">
+                    <i class="fa-solid fa-id-card text-indigo-600"></i> Quy Tắc Mã SBD & STT Vi Phạm
+                </h2>
+                <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Hệ thống chuẩn hóa mã SBD 6 chữ số cho từng lớp. Khi chấm vi phạm cá nhân, chỉ cần nhập <strong>STT 2 chữ số cuối</strong> của SBD.
+                </p>
 
-                <!-- SBD Rules Table Demo -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
-                        <div class="font-extrabold text-indigo-900 text-lg">Khối 10: Lớp 10A6</div>
-                        <div class="text-xs text-indigo-700 mt-1 font-semibold">Dải Mã SBD: <span class="bg-white px-2 py-0.5 rounded border border-indigo-300 font-mono">106001 - 106050</span></div>
-                        <ul class="text-xs text-slate-700 mt-3 space-y-1">
-                            <li>• VD SBD <strong>106025</strong>: STT <strong class="text-indigo-800">25</strong> (Mã nhập: 25)</li>
-                            <li>• VD SBD <strong>106026</strong>: STT <strong class="text-indigo-800">26</strong> (Mã nhập: 26)</li>
-                        </ul>
+                <div class="space-y-2">
+                    <div class="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900">
+                        <div class="font-bold text-indigo-900 dark:text-indigo-300">Lớp 10A6 (Khối 10)</div>
+                        <div class="text-[11px] text-slate-600 dark:text-slate-400">Mã SBD: <code class="font-mono bg-white dark:bg-slate-900 px-1 rounded">106001 - 106050</code></div>
+                        <div class="text-[11px] text-indigo-700 dark:text-indigo-400 mt-1">• Ví dụ SBD <strong>106025</strong> $\rightarrow$ Nhập STT: <strong>25</strong></div>
                     </div>
-
-                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                        <div class="font-extrabold text-blue-900 text-lg">Khối 11: Lớp 11A1</div>
-                        <div class="text-xs text-blue-700 mt-1 font-semibold">Dải Mã SBD: <span class="bg-white px-2 py-0.5 rounded border border-blue-300 font-mono">111001 - 111050</span></div>
-                        <ul class="text-xs text-slate-700 mt-3 space-y-1">
-                            <li>• VD SBD <strong>111005</strong>: STT <strong class="text-blue-800">05</strong> (Mã nhập: 05)</li>
-                            <li>• VD SBD <strong>111018</strong>: STT <strong class="text-blue-800">18</strong> (Mã nhập: 18)</li>
-                        </ul>
+                    <div class="p-2.5 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900">
+                        <div class="font-bold text-blue-900 dark:text-blue-300">Lớp 11A1 (Khối 11)</div>
+                        <div class="text-[11px] text-slate-600 dark:text-slate-400">Mã SBD: <code class="font-mono bg-white dark:bg-slate-900 px-1 rounded">111001 - 111050</code></div>
+                        <div class="text-[11px] text-blue-700 dark:text-blue-400 mt-1">• Ví dụ SBD <strong>111005</strong> $\rightarrow$ Nhập STT: <strong>05</strong></div>
                     </div>
-
-                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                        <div class="font-extrabold text-emerald-900 text-lg">Khối 12: Lớp 12A2</div>
-                        <div class="text-xs text-emerald-700 mt-1 font-semibold">Dải Mã SBD: <span class="bg-white px-2 py-0.5 rounded border border-emerald-300 font-mono">122001 - 122050</span></div>
-                        <ul class="text-xs text-slate-700 mt-3 space-y-1">
-                            <li>• VD SBD <strong>122002</strong>: STT <strong class="text-emerald-800">02</strong> (Mã nhập: 02)</li>
-                            <li>• VD SBD <strong>122044</strong>: STT <strong class="text-emerald-800">44</strong> (Mã nhập: 44)</li>
-                        </ul>
+                    <div class="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-100 dark:border-emerald-900">
+                        <div class="font-bold text-emerald-900 dark:text-emerald-300">Lớp 12A1 (Khối 12)</div>
+                        <div class="text-[11px] text-slate-600 dark:text-slate-400">Mã SBD: <code class="font-mono bg-white dark:bg-slate-900 px-1 rounded">121001 - 121050</code></div>
+                        <div class="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1">• Ví dụ SBD <strong>121012</strong> $\rightarrow$ Nhập STT: <strong>12</strong></div>
                     </div>
                 </div>
 
-                <!-- Input Instructions -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h3 class="font-bold text-slate-800 mb-2 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-keyboard text-indigo-600"></i> Hướng dẫn nhập nhanh lỗi cá nhân
-                    </h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Bạn có thể nhập danh sách các STT vi phạm bằng cách gõ trực tiếp các số cách nhau bởi <strong>dấu phẩy (,), dấu gạch ngang (-), khoảng trắng</strong> hoặc bấm các gợi ý nhanh.
-                        <br>Ví dụ nhập: <code class="bg-slate-200 px-1.5 py-0.5 rounded font-mono text-slate-800">1 32 13 5 14 14 23</code> $\rightarrow$ Hệ thống tự chuẩn hóa thành: <code class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded font-mono">01-05-13-14-14-23-32</code>.
+                <div class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div class="font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Tự động định dạng thông minh
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
+                        Bạn chỉ cần gõ liền chuỗi số (VD: <code class="font-mono">01321305141423</code>), hệ thống sẽ tự động tách 2 chữ số và formatted thành: <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">01-05-13-14-14-23-32</code>.
                     </p>
                 </div>
             </div>
@@ -279,414 +231,402 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-slate-800 text-slate-400 py-4 text-center text-xs border-t border-slate-700 no-print mt-auto">
-        <p>© Hệ thống Quản lý Thi đua Học đường TKTĐ - Chuẩn hóa 38 Tiêu chí Thi đua</p>
-    </footer>
+    <!-- BOTTOM MOBILE NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 z-50 shadow-lg pb-safe">
+        <div class="max-w-lg mx-auto grid grid-cols-3 h-14">
+            <button id="nav-btn-input" onclick="switchTab('input')" class="flex flex-col items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold">
+                <i class="fa-solid fa-pen-to-square text-base mb-0.5"></i>
+                <span class="text-[10px]">1. Nhập Lớp</span>
+            </button>
+            <button id="nav-btn-summary" onclick="switchTab('summary')" class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium">
+                <i class="fa-solid fa-chart-line text-base mb-0.5"></i>
+                <span class="text-[10px]">2. Bảng Xếp Hạng</span>
+            </button>
+            <button id="nav-btn-guide" onclick="switchTab('guide')" class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium">
+                <i class="fa-solid fa-circle-info text-base mb-0.5"></i>
+                <span class="text-[10px]">Quy Định SBD</span>
+            </button>
+        </div>
+    </nav>
 
-    <!-- NOTIFICATION TOAST -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-700 pointer-events-none">
-        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-        <span id="toast-msg" class="text-sm font-medium">Thông báo</span>
+    <!-- MENU / DATA MODAL -->
+    <div id="menu-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 space-y-4 border border-slate-200 dark:border-slate-700 shadow-2xl">
+            <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700">
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-indigo-600"></i> Quản Lý Dữ Liệu & Thao Tác
+                </h3>
+                <button onclick="closeMenuModal()" class="w-8 h-8 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <button onclick="exportJSON()" class="p-3 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold rounded-xl flex flex-col items-center gap-1.5 transition">
+                    <i class="fa-solid fa-file-export text-lg text-indigo-600 dark:text-indigo-400"></i>
+                    <span>Xuất File JSON</span>
+                </button>
+                <label class="p-3 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold rounded-xl flex flex-col items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-file-import text-lg text-emerald-600 dark:text-emerald-400"></i>
+                    <span>Nhập File JSON</span>
+                    <input type="file" id="import-file" accept=".json" onchange="importJSON(event)" class="hidden">
+                </label>
+                <button onclick="window.print()" class="p-3 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 font-bold rounded-xl flex flex-col items-center gap-1.5 transition">
+                    <i class="fa-solid fa-print text-lg text-blue-600 dark:text-blue-400"></i>
+                    <span>In / Báo Cáo PDF</span>
+                </button>
+                <button onclick="resetDataPrompt()" class="p-3 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-700 dark:text-rose-400 font-bold rounded-xl flex flex-col items-center gap-1.5 transition border border-rose-200 dark:border-rose-900">
+                    <i class="fa-solid fa-trash-arrow-up text-lg"></i>
+                    <span>Xóa Tất Cả Dữ Liệu</span>
+                </button>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="closeMenuModal()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 dark:bg-slate-100/90 backdrop-blur text-white dark:text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl transition-all duration-300 pointer-events-none opacity-0 translate-y-[-20px] z-50 flex items-center gap-2">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600"></i>
+        <span id="toast-msg">Thông báo</span>
     </div>
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
         // ==========================================
-        // 1. DATA STRUCTURES & 38 CRITERIA DEFINITION
+        // 1. DATA STRUCTURES & CONFIG
         // ==========================================
 
-        // Sample Classes Configuration representing 3 Blocks
         const SAMPLE_CLASSES = [
-            { id: "10A6", name: "Lớp 10A6", block: "Khối 10", sbdPrefix: "106", exampleSBD: "106025 (STT 26)" },
-            { id: "11A1", name: "Lớp 11A1", block: "Khối 11", sbdPrefix: "111", exampleSBD: "111005 (STT 05)" },
-            { id: "12A2", name: "Lớp 12A2", block: "Khối 12", sbdPrefix: "122", exampleSBD: "122012 (STT 12)" }
+            { id: "10A1", name: "Lớp 10A1", block: "Khối 10", sbdPrefix: "101", exampleSBD: "101005 (STT 05)" },
+            { id: "10A6", name: "Lớp 10A6", block: "Khối 10", sbdPrefix: "106", exampleSBD: "106025 (STT 25)" },
+            { id: "12A1", name: "Lớp 12A1", block: "Khối 12", sbdPrefix: "121", exampleSBD: "121012 (STT 12)" }
         ];
 
-        // 38 Criteria Categorized into 4 Vivid Groups
-        // Type: 'group' = General Class Count | 'individual' = SBD/STT list
         const CRITERIA_38 = [
-            // --- NHÓM 1: HỌC TẬP (10 Tiêu chí) ---
-            { id: 1, group: "Học Tập", title: "Tiết học tốt / Giờ học tốt", type: "group", points: 2, isBonus: true, desc: "Cộng điểm cho mỗi tiết học tốt" },
+            // --- HỌC TẬP (10) ---
+            { id: 1, group: "Học Tập", title: "Tiết học tốt / Giờ học tốt", type: "group", points: 2, isBonus: true, desc: "Cộng điểm cho tiết học tốt" },
             { id: 2, group: "Học Tập", title: "Tiết học loại B", type: "group", points: -2, isBonus: false, desc: "Trừ điểm tiết xếp loại B" },
             { id: 3, group: "Học Tập", title: "Tiết học loại C", type: "group", points: -5, isBonus: false, desc: "Trừ điểm tiết xếp loại C" },
             { id: 4, group: "Học Tập", title: "Tiết học loại D", type: "group", points: -10, isBonus: false, desc: "Trừ điểm tiết xếp loại D" },
             { id: 5, group: "Học Tập", title: "Điểm 8, 9, 10 (Điểm tốt)", type: "group", points: 1, isBonus: true, desc: "Mỗi điểm tốt được cộng điểm" },
-            { id: 6, group: "Học Tập", title: "Không thuộc bài / Không làm bài tập", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 7, group: "Học Tập", title: "Không đem sách vở, dụng cụ học tập", type: "individual", points: -1, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 6, group: "Học Tập", title: "Không thuộc bài / Không làm bài", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 7, group: "Học Tập", title: "Thiếu sách vở, dụng cụ học tập", type: "individual", points: -1, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
             { id: 8, group: "Học Tập", title: "Mất trật tự trong giờ học", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 9, group: "Học Tập", title: "Sử dụng điện thoại không đúng quy định", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 10, group: "Học Tập", title: "Gian lận trong kiểm tra / Thi cử", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 9, group: "Học Tập", title: "Dùng điện thoại sai quy định", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 10, group: "Học Tập", title: "Gian lận trong kiểm tra", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
 
-            // --- NHÓM 2: NỀN NẾP & KỶ LUẬT (12 Tiêu chí) ---
-            { id: 11, group: "Nền Nếp & Kỷ Luật", title: "Nghỉ học không phép", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vắng không phép" },
-            { id: 12, group: "Nền Nếp & Kỷ Luật", title: "Đi học muộn / Vào lớp muộn", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh đi trễ" },
-            { id: 13, group: "Nền Nếp & Kỷ Luật", title: "Không mặc đồng phục quy định", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 14, group: "Nền Nếp & Kỷ Luật", title: "Không đeo thẻ học sinh / Phù hiệu", type: "individual", points: -1, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 15, group: "Nền Nếp & Kỷ Luật", title: "Tóc không đúng quy định / Nhuộm tóc", type: "individual", points: -3, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 16, group: "Nền Nếp & Kỷ Luật", title: "Khỏi lớp / Khỏi trường không xin phép", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 17, group: "Nền Nếp & Kỷ Luật", title: "Không tham gia chào cờ / Sinh hoạt tập thể", type: "individual", points: -3, isBonus: false, desc: "Nhập STT học sinh vắng" },
-            { id: 18, group: "Nền Nếp & Kỷ Luật", title: "Hút thuốc / Sử dụng chất kích thích", type: "individual", points: -20, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 19, group: "Nền Nếp & Kỷ Luật", title: "Gây mất trật tự, cãi nhau, đánh nhau", type: "individual", points: -15, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 20, group: "Nền Nếp & Kỷ Luật", title: "Nói tục, chửi thề, vô lễ với giáo viên", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 21, group: "Nền Nếp & Kỷ Luật", title: "Vi phạm luật giao thông (Đi xe máy, không mũ bảo hiểm)", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 22, group: "Nền Nếp & Kỷ Luật", title: "Đi trễ tập thể (Trên 5 học sinh/lần)", type: "group", points: -5, isBonus: false, desc: "Trừ điểm vi phạm tập thể" },
+            // --- NỀN NẾP & KỶ LUẬT (12) ---
+            { id: 11, group: "Nền Nếp & Kỷ Luật", title: "Nghỉ học không phép", type: "individual", points: -5, isBonus: false, desc: "Nhập STT vắng không phép" },
+            { id: 12, group: "Nền Nếp & Kỷ Luật", title: "Đi học muộn / Vào lớp muộn", type: "individual", points: -2, isBonus: false, desc: "Nhập STT đi trễ" },
+            { id: 13, group: "Nền Nếp & Kỷ Luật", title: "Không mặc đồng phục", type: "individual", points: -2, isBonus: false, desc: "Nhập STT không đúng đồng phục" },
+            { id: 14, group: "Nền Nếp & Kỷ Luật", title: "Không đeo thẻ học sinh / Phù hiệu", type: "individual", points: -1, isBonus: false, desc: "Nhập STT vi phạm thẻ/phù hiệu" },
+            { id: 15, group: "Nền Nếp & Kỷ Luật", title: "Tóc sai quy định / Nhuộm tóc", type: "individual", points: -3, isBonus: false, desc: "Nhập STT vi phạm quy định tóc" },
+            { id: 16, group: "Nền Nếp & Kỷ Luật", title: "Trốn tiết / Trốn trường", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh trốn tiết" },
+            { id: 17, group: "Nền Nếp & Kỷ Luật", title: "Vắng chào cờ / SH tập thể", type: "individual", points: -3, isBonus: false, desc: "Nhập STT vắng tập trung" },
+            { id: 18, group: "Nền Nếp & Kỷ Luật", title: "Hút thuốc / Chất kích thích", type: "individual", points: -20, isBonus: false, desc: "Nhập STT học sinh vi phạm nghiêm trọng" },
+            { id: 19, group: "Nền Nếp & Kỷ Luật", title: "Gây mất trật tự / Đánh nhau", type: "individual", points: -15, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 20, group: "Nền Nếp & Kỷ Luật", title: "Nói tục / Vô lễ giáo viên", type: "individual", points: -10, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
+            { id: 21, group: "Nền Nếp & Kỷ Luật", title: "Vi phạm luật giao thông", type: "individual", points: -10, isBonus: false, desc: "Nhập STT vi phạm giao thông" },
+            { id: 22, group: "Nền Nếp & Kỷ Luật", title: "Đi trễ tập thể (>5 học sinh)", type: "group", points: -5, isBonus: false, desc: "Trừ điểm vi phạm đi trễ đông" },
 
-            // --- NHÓM 3: VỆ SINH & LAO ĐỘNG (8 Tiêu chí) ---
-            { id: 23, group: "Vệ Sinh & Lao Động", title: "Trực nhật muộn / Trực nhật không sạch", type: "group", points: -5, isBonus: false, desc: "Trừ điểm trực nhật kém" },
-            { id: 24, group: "Vệ Sinh & Lao Động", title: "Không đổ rác đúng nơi quy định", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vứt rác bừa bãi" },
-            { id: 25, group: "Vệ Sinh & Lao Động", title: "Bỏ trực nhật / Không tham gia lao động", type: "individual", points: -5, isBonus: false, desc: "Nhập STT học sinh bỏ trực nhật" },
-            { id: 26, group: "Vệ Sinh & Lao Động", title: "Ăn quà vặt trong lớp học", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 27, group: "Vệ Sinh & Lao Động", title: "Không tắt điện, quạt khi ra khỏi phòng", type: "group", points: -3, isBonus: false, desc: "Trừ điểm lãng phí điện" },
-            { id: 28, group: "Vệ Sinh & Lao Động", title: "Làm hư hỏng tài sản nhà trường", type: "group", points: -10, isBonus: false, desc: "Trừ điểm vi phạm tài sản" },
-            { id: 29, group: "Vệ Sinh & Lao Động", title: "Lớp học sạch đẹp xuất sắc cả tuần", type: "group", points: 5, isBonus: true, desc: "Cộng điểm khen thưởng" },
-            { id: 30, group: "Vệ Sinh & Lao Động", title: "Tham gia lao động / Trồng cây xuất sắc", type: "group", points: 5, isBonus: true, desc: "Cộng điểm phong trào lao động" },
+            // --- VỆ SINH & LAO ĐỘNG (8) ---
+            { id: 23, group: "Vệ Sinh & Lao Động", title: "Trực nhật muộn / Trực nhật kém", type: "group", points: -5, isBonus: false, desc: "Trừ điểm trực nhật không sạch" },
+            { id: 24, group: "Vệ Sinh & Lao Động", title: "Vứt rác bừa bãi", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh xả rác" },
+            { id: 25, group: "Vệ Sinh & Lao Động", title: "Bỏ trực nhật / Bỏ lao động", type: "individual", points: -5, isBonus: false, desc: "Nhập STT bỏ nhiệm vụ" },
+            { id: 26, group: "Vệ Sinh & Lao Động", title: "Ăn quà vặt trong lớp", type: "individual", points: -2, isBonus: false, desc: "Nhập STT học sinh ăn quà vặt" },
+            { id: 27, group: "Vệ Sinh & Lao Động", title: "Không tắt điện, quạt khi ra ngoài", type: "group", points: -3, isBonus: false, desc: "Trừ điểm lãng phí điện" },
+            { id: 28, group: "Vệ Sinh & Lao Động", title: "Làm hư hỏng tài sản trường", type: "group", points: -10, isBonus: false, desc: "Trừ điểm hư hỏng CSVC" },
+            { id: 29, group: "Vệ Sinh & Lao Động", title: "Lớp học sạch đẹp cả tuần", type: "group", points: 5, isBonus: true, desc: "Cộng điểm khen thưởng" },
+            { id: 30, group: "Vệ Sinh & Lao Động", title: "Tham gia lao động xuất sắc", type: "group", points: 5, isBonus: true, desc: "Cộng điểm phong trào" },
 
-            // --- NHÓM 4: HOẠT ĐỘNG PHONG TRÀO (8 Tiêu chí) ---
-            { id: 31, group: "Hoạt Động Phong Trào", title: "Đạt giải Phong trào / Văn nghệ / Thể thao cấp trường", type: "group", points: 10, isBonus: true, desc: "Cộng điểm thành tích" },
-            { id: 32, group: "Hoạt Động Phong Trào", title: "Đạt giải cấp Tỉnh / Thành phố", type: "group", points: 20, isBonus: true, desc: "Cộng điểm thành tích xuất sắc" },
-            { id: 33, group: "Hoạt Động Phong Trào", title: "Gương người tốt việc tốt (Nhặt được của rơi...)", type: "individual", points: 5, isBonus: true, desc: "Cộng điểm tuyên dương cá nhân" },
-            { id: 34, group: "Hoạt Động Phong Trào", title: "Không tham gia phong trào phát động", type: "group", points: -5, isBonus: false, desc: "Trừ điểm thiếu tham gia" },
-            { id: 35, group: "Hoạt Động Phong Trào", title: "Nộp báo cáo / Ke khai muộn quy định", type: "group", points: -3, isBonus: false, desc: "Trừ điểm nộp muộn" },
-            { id: 36, group: "Hoạt Động Phong Trào", title: "Vi phạm quy định Đoàn / Đội", type: "individual", points: -3, isBonus: false, desc: "Nhập STT học sinh vi phạm" },
-            { id: 37, group: "Hoạt Động Phong Trào", title: "Tập thể tích cực tham gia CLB / Hoạt động trải nghiệm", type: "group", points: 5, isBonus: true, desc: "Cộng điểm tích cực" },
-            { id: 38, group: "Hoạt Động Phong Trào", title: "Khen thưởng đột xuất từ Ban Giám Hiệu", type: "group", points: 10, isBonus: true, desc: "Cộng điểm thưởng BGH" }
+            // --- HOẠT ĐỘNG PHONG TRÀO (8) ---
+            { id: 31, group: "Hoạt Động Phong Trào", title: "Đạt giải phong trào cấp trường", type: "group", points: 10, isBonus: true, desc: "Cộng điểm thành tích" },
+            { id: 32, group: "Hoạt Động Phong Trào", title: "Đạt giải phong trào cấp tỉnh/TP", type: "group", points: 20, isBonus: true, desc: "Cộng điểm thành tích xuất sắc" },
+            { id: 33, group: "Hoạt Động Phong Trào", title: "Gương người tốt việc tốt", type: "individual", points: 5, isBonus: true, desc: "Nhập STT tuyên dương cá nhân" },
+            { id: 34, group: "Hoạt Động Phong Trào", title: "Không tham gia phong trào chung", type: "group", points: -5, isBonus: false, desc: "Trừ điểm thiếu tham gia" },
+            { id: 35, group: "Hoạt Động Phong Trào", title: "Nộp báo cáo / Kê khai muộn", type: "group", points: -3, isBonus: false, desc: "Trừ điểm nộp muộn" },
+            { id: 36, group: "Hoạt Động Phong Trào", title: "Vi phạm quy định Đoàn/Đội", type: "individual", points: -3, isBonus: false, desc: "Nhập STT vi phạm Đoàn/Đội" },
+            { id: 37, group: "Hoạt Động Phong Trào", title: "Tích cực tham gia CLB/Trải nghiệm", type: "group", points: 5, isBonus: true, desc: "Cộng điểm tích cực" },
+            { id: 38, group: "Hoạt Động Phong Trào", title: "Khen thưởng đột xuất Ban Giám Hiệu", type: "group", points: 10, isBonus: true, desc: "Cộng điểm BGH thưởng" }
         ];
 
-        // State Storage Data Structure
-        // appData[weekKey][classId][criteriaId] = { count: 0, sttList: [] }
         let appData = {};
 
         // ==========================================
-        // 2. INITIALIZATION & STORAGE LOGIC
+        // 2. INITIALIZATION & AUTO-SAVE
         // ==========================================
 
         window.onload = function() {
             initWeekSelector();
             initClassSelector();
+            loadDarkModePreference();
             loadStorageData();
-            
-            // Set initial state & render
-            changeWeekOrClass();
+            onWeekOrClassChange();
         };
 
         function initWeekSelector() {
             const weekSelect = document.getElementById('select-week');
-            const summaryWeekSelect = document.getElementById('summary-week-filter');
             weekSelect.innerHTML = '';
-            summaryWeekSelect.innerHTML = '';
-
             for (let i = 1; i <= 35; i++) {
-                const opt1 = document.createElement('option');
-                opt1.value = `Tuần ${i}`;
-                opt1.textContent = `Tuần ${i}`;
-                weekSelect.appendChild(opt1);
-
-                const opt2 = document.createElement('option');
-                opt2.value = `Tuần ${i}`;
-                opt2.textContent = `Tuần ${i}`;
-                summaryWeekSelect.appendChild(opt2);
+                const opt = document.createElement('option');
+                opt.value = `Tuần ${i}`;
+                opt.textContent = `Tuần ${i}`;
+                weekSelect.appendChild(opt);
             }
         }
 
         function initClassSelector() {
             const classSelect = document.getElementById('select-class');
             classSelect.innerHTML = '';
-
             SAMPLE_CLASSES.forEach(cls => {
                 const opt = document.createElement('option');
                 opt.value = cls.id;
-                opt.textContent = `${cls.name} (${cls.block}) - Mã SBD: ${cls.sbdPrefix}xxx`;
+                opt.textContent = `${cls.name} (${cls.block})`;
                 classSelect.appendChild(opt);
             });
         }
 
         function loadStorageData() {
-            const saved = localStorage.getItem('tktd_emulation_data');
+            const saved = localStorage.getItem('tktd_mobile_data');
             if (saved) {
-                try {
-                    appData = JSON.parse(saved);
-                } catch (e) {
-                    console.error('Error loading storage', e);
-                    appData = {};
-                }
+                try { appData = JSON.parse(saved); } catch(e) { appData = {}; }
             }
         }
 
-        function saveStorageData() {
-            localStorage.setItem('tktd_emulation_data', JSON.stringify(appData));
+        function triggerAutoSave() {
+            localStorage.setItem('tktd_mobile_data', JSON.stringify(appData));
+            showSaveIndicator();
+        }
+
+        function showSaveIndicator() {
+            const el = document.getElementById('save-status');
+            el.style.opacity = '1';
+            el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-[9px] animate-bounce"></i> <span>Đã tự động lưu</span>`;
         }
 
         // ==========================================
-        // 3. CORE LOGIC & CALCULATION
+        // 3. CORE LOGIC & SMART PARSING
         // ==========================================
 
-        function getSelectedWeek() {
-            return document.getElementById('select-week').value;
-        }
+        function getSelectedWeek() { return document.getElementById('select-week').value; }
+        function getSelectedClassId() { return document.getElementById('select-class').value; }
+        function getClassInfo(id) { return SAMPLE_CLASSES.find(c => c.id === id) || SAMPLE_CLASSES[0]; }
 
-        function getSelectedClassId() {
-            return document.getElementById('select-class').value;
-        }
-
-        function getClassInfo(classId) {
-            return SAMPLE_CLASSES.find(c => c.id === classId) || SAMPLE_CLASSES[0];
-        }
-
-        // Get or initialize record data for specific week and class
         function getClassRecord(week, classId) {
             if (!appData[week]) appData[week] = {};
             if (!appData[week][classId]) appData[week][classId] = {};
             return appData[week][classId];
         }
 
-        // Calculate score for a class in a week
         function calculateClassScore(week, classId) {
             const record = getClassRecord(week, classId);
-            let score = 100; // Base score
+            let score = 100;
 
             CRITERIA_38.forEach(c => {
                 const entry = record[c.id];
                 if (entry) {
                     if (c.type === 'group') {
-                        const count = entry.count || 0;
-                        score += count * c.points;
+                        score += (entry.count || 0) * c.points;
                     } else if (c.type === 'individual') {
-                        const sttList = entry.sttList || [];
-                        score += sttList.length * c.points;
+                        score += (entry.sttList || []).length * c.points;
                     }
                 }
             });
-
             return score;
         }
 
-        // Helper to format SBD/STT Array (e.g., [1, 32, 13, 5] -> "01-05-13-32")
-        function formatSTTList(list) {
-            if (!list || list.length === 0) return "";
-            // Clean, format 2 digits, and sort
-            const formatted = list
-                .map(num => String(num).padStart(2, '0'))
-                .sort((a, b) => a.localeCompare(b));
-            return formatted.join('-');
+        // SMART STT PARSER: Clean and parse string into array of 2-digit STTs
+        // Handles formats like "01321305141423", "1, 32, 13", "1 32 13", "01-32-13"
+        function parseSmartSTTInput(raw) {
+            if (!raw || !raw.trim()) return [];
+
+            let cleaned = raw.replace(/[^0-9]/g, '');
+            let numbers = [];
+
+            // If string length is even and digits are continuous (e.g. "01321305")
+            if (cleaned.length % 2 === 0 && !raw.includes(',') && !raw.includes(' ') && !raw.includes('-')) {
+                for (let i = 0; i < cleaned.length; i += 2) {
+                    let num = parseInt(cleaned.substr(i, 2), 10);
+                    if (num >= 1 && num <= 99) numbers.push(num);
+                }
+            } else {
+                // Otherwise split by delimiters
+                let parts = raw.split(/[-,\s;]+/);
+                parts.forEach(p => {
+                    let cleanPart = p.replace(/[^0-9]/g, '');
+                    if (cleanPart) {
+                        let num = parseInt(cleanPart, 10);
+                        if (num >= 1 && num <= 99) numbers.push(num);
+                    }
+                });
+            }
+
+            // Sort & remove duplicates if desired, or keep exact violation counts
+            return numbers;
         }
 
-        // Helper to parse text input into array of STT numbers
-        function parseInputToSTTArray(text) {
-            if (!text || text.trim() === '') return [];
-            // Split by dash, comma, space, semicolon
-            const parts = text.split(/[-,\s;]+/);
-            const result = [];
-
-            parts.forEach(p => {
-                const clean = p.trim();
-                if (clean !== '' && !isNaN(clean)) {
-                    const num = parseInt(clean, 10);
-                    if (num >= 1 && num <= 99) {
-                        result.push(num);
-                    }
-                }
-            });
-            return result;
+        function formatSTTDisplay(sttList) {
+            if (!sttList || sttList.length === 0) return '';
+            return sttList.map(n => String(n).padStart(2, '0')).join('-');
         }
 
         // ==========================================
         // 4. UI RENDER FUNCTIONS
         // ==========================================
 
-        function changeWeekOrClass() {
+        function onWeekOrClassChange() {
             const week = getSelectedWeek();
             const classId = getSelectedClassId();
             const classObj = getClassInfo(classId);
 
-            // Update Header Displays
-            document.getElementById('current-group-label').textContent = classObj.block;
-            document.getElementById('print-week-title').textContent = week;
-            document.getElementById('print-class-title').textContent = classObj.name;
+            // Update Top Score Banner
+            document.getElementById('banner-class-name').textContent = classObj.name;
+            document.getElementById('banner-sbd-prefix').textContent = `SBD ${classObj.sbdPrefix}xxx`;
+            document.getElementById('banner-block-name').textContent = `${classObj.block} • Điểm gốc: 100đ`;
 
-            // Render criteria input form
-            renderCriteriaForm(week, classId);
-
-            // Update scores and rank
-            updateScoreAndBadgeDisplay(week, classId);
-
-            // Sync Summary tab if active
-            renderSummaryTable();
+            updateBannerScoreAndRank(week, classId, classObj);
+            renderCriteriaList(week, classId);
+            renderSummaryView();
         }
 
-        function updateScoreAndBadgeDisplay(week, classId) {
-            const currentScore = calculateClassScore(week, classId);
-            document.getElementById('current-score-display').textContent = currentScore;
-            document.getElementById('print-score-title').textContent = currentScore;
+        function updateBannerScoreAndRank(week, classId, classObj) {
+            const score = calculateClassScore(week, classId);
+            document.getElementById('banner-score').textContent = score;
 
-            // Calculate rank inside its block/group
-            const classObj = getClassInfo(classId);
+            // Compute rank within block
             const blockClasses = SAMPLE_CLASSES.filter(c => c.block === classObj.block);
-            
-            // Map scores
-            const scores = blockClasses.map(c => ({
-                id: c.id,
-                score: calculateClassScore(week, c.id)
-            })).sort((a, b) => b.score - a.score);
+            const scores = blockClasses.map(c => ({ id: c.id, score: calculateClassScore(week, c.id) }))
+                                       .sort((a,b) => b.score - a.score);
 
-            const rank = scores.findIndex(item => item.id === classId) + 1;
-            document.getElementById('current-rank-badge').textContent = `Hạng Khối: ${rank}`;
+            const rank = scores.findIndex(s => s.id === classId) + 1;
+            document.getElementById('banner-rank-badge').textContent = `Hạng ${rank}`;
         }
 
-        function renderCriteriaForm(week, classId) {
-            const container = document.getElementById('criteria-list-container');
+        function renderCriteriaList(week, classId) {
+            const container = document.getElementById('criteria-container');
             container.innerHTML = '';
 
             const record = getClassRecord(week, classId);
-            const classObj = getClassInfo(classId);
+            const filterKeyword = (document.getElementById('criteria-search').value || '').toLowerCase().trim();
 
-            // Group criteria by group name
-            const groups = ["Học Tập", "Nền Nếp & Kỷ Luật", "Vệ Sinh & Lao Động", "Hoạt Động Phong Trào"];
+            CRITERIA_38.forEach(item => {
+                if (filterKeyword && !item.title.toLowerCase().includes(filterKeyword) && !item.group.toLowerCase().includes(filterKeyword)) {
+                    return;
+                }
 
-            groups.forEach(groupName => {
-                const groupItems = CRITERIA_38.filter(c => c.group === groupName);
-                if (groupItems.length === 0) return;
+                const itemData = record[item.id] || { count: 0, sttList: [] };
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2 transition-all";
 
-                // Group Wrapper
-                const groupEl = document.createElement('div');
-                groupEl.className = "bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm";
+                const badgeClass = item.isBonus 
+                    ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800" 
+                    : "bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800";
+                const pointsStr = item.isBonus ? `+${item.points}đ` : `${item.points}đ`;
 
-                // Group Header
-                let iconClass = "fa-book";
-                if (groupName.includes("Nền Nếp")) iconClass = "fa-user-shield";
-                if (groupName.includes("Vệ Sinh")) iconClass = "fa-broom";
-                if (groupName.includes("Phong Trào")) iconClass = "fa-flag";
+                let controlHtml = "";
 
-                groupEl.innerHTML = `
-                    <div class="bg-slate-200/80 px-4 py-2.5 font-extrabold text-slate-800 text-sm flex items-center justify-between border-b border-slate-300">
-                        <span class="flex items-center gap-2"><i class="fa-solid ${iconClass} text-indigo-700"></i> ${groupName}</span>
-                        <span class="text-xs font-semibold text-slate-600 bg-white px-2 py-0.5 rounded-full border">${groupItems.length} Tiêu chí</span>
-                    </div>
-                    <div class="divide-y divide-slate-200 bg-white"></div>
-                `;
-
-                const listBody = groupEl.querySelector('.divide-y');
-
-                groupItems.forEach(item => {
-                    const itemData = record[item.id] || { count: 0, sttList: [] };
-                    const row = document.createElement('div');
-                    row.className = "p-3.5 sm:p-4 hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3";
-
-                    // Points Badge
-                    const badgeColor = item.isBonus 
-                        ? "bg-emerald-100 text-emerald-800 border-emerald-300" 
-                        : "bg-rose-100 text-rose-800 border-rose-300";
-                    const pointsText = item.isBonus ? `+${item.points} đ` : `${item.points} đ`;
-
-                    let inputControlsHtml = "";
-
-                    if (item.type === 'group') {
-                        // GROUP TYPE: COUNT CONTROLLER
-                        const count = itemData.count || 0;
-                        inputControlsHtml = `
-                            <div class="flex items-center space-x-2">
-                                <span class="text-xs font-bold text-slate-500 mr-2">Số lượng:</span>
-                                <button onclick="updateGroupCount('${week}', '${classId}', ${item.id}, -1)" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 font-bold text-slate-700 flex items-center justify-center transition active:scale-95 no-print">-</button>
-                                <input type="number" min="0" value="${count}" onchange="setGroupCount('${week}', '${classId}', ${item.id}, this.value)" class="w-14 text-center font-bold text-base border border-slate-300 rounded-lg p-1 focus:ring-2 focus:ring-indigo-500">
-                                <button onclick="updateGroupCount('${week}', '${classId}', ${item.id}, 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-bold text-white flex items-center justify-center transition active:scale-95 shadow-sm no-print">+</button>
+                if (item.type === 'group') {
+                    // COUNTER BUTTONS FOR GROUP TYPE
+                    const count = itemData.count || 0;
+                    controlHtml = `
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/50">
+                            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Số lượt vi phạm/cộng:</span>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="changeGroupCount('${week}', '${classId}', ${item.id}, -1)" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-700 active:bg-slate-200 dark:active:bg-slate-600 font-bold text-slate-700 dark:text-slate-200 text-sm flex items-center justify-center transition active:scale-95">-</button>
+                                <input type="number" min="0" value="${count}" onchange="setGroupCountDirect('${week}', '${classId}', ${item.id}, this.value)" class="w-12 text-center font-bold text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-1 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <button onclick="changeGroupCount('${week}', '${classId}', ${item.id}, 1)" class="w-8 h-8 rounded-xl bg-indigo-600 active:bg-indigo-700 font-bold text-white text-sm flex items-center justify-center transition active:scale-95 shadow-sm">+</button>
                             </div>
-                        `;
-                    } else {
-                        // INDIVIDUAL TYPE: SBD / STT INPUT
-                        const formattedText = formatSTTList(itemData.sttList || []);
-                        const countViolations = (itemData.sttList || []).length;
-
-                        inputControlsHtml = `
-                            <div class="w-full sm:w-auto flex-grow max-w-md">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-[11px] font-bold text-slate-500">
-                                        Mã STT (2 chữ số cuối SBD ${classObj.sbdPrefix}xxx):
-                                    </span>
-                                    <span class="text-xs font-bold ${countViolations > 0 ? 'text-rose-600 bg-rose-50 px-2 py-0.5 rounded' : 'text-slate-400'}">
-                                        Tổng: ${countViolations} lượt
-                                    </span>
-                                </div>
-                                <div class="relative">
-                                    <input type="text" 
-                                        value="${formattedText}" 
-                                        placeholder="VD: 01-32-13-05 (Gõ số cách nhau)" 
-                                        onblur="handleIndividualInput('${week}', '${classId}', ${item.id}, this.value)"
-                                        onkeyup="if(event.key==='Enter') handleIndividualInput('${week}', '${classId}', ${item.id}, this.value)"
-                                        class="w-full font-mono font-bold text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
-                                    />
-                                </div>
-                                <div class="mt-1 flex flex-wrap gap-1 no-print">
-                                    <span class="text-[10px] text-slate-400">Gợi ý thêm nhanh:</span>
-                                    <button onclick="quickAddSTT('${week}', '${classId}', ${item.id}, '25')" class="text-[10px] bg-slate-200 hover:bg-indigo-100 text-slate-700 hover:text-indigo-800 px-1.5 py-0.5 rounded transition">+25 (STT 25)</button>
-                                    <button onclick="quickAddSTT('${week}', '${classId}', ${item.id}, '26')" class="text-[10px] bg-slate-200 hover:bg-indigo-100 text-slate-700 hover:text-indigo-800 px-1.5 py-0.5 rounded transition">+26 (STT 26)</button>
-                                    <button onclick="clearSTT('${week}', '${classId}', ${item.id})" class="text-[10px] bg-rose-100 text-rose-700 hover:bg-rose-200 px-1.5 py-0.5 rounded transition ml-auto">Xóa tất cả</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    row.innerHTML = `
-                        <div class="flex items-start gap-3 flex-grow">
-                            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded w-8 text-center shrink-0">${item.id}</span>
-                            <div>
-                                <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                                    ${item.title}
-                                    <span class="text-xs px-2 py-0.5 rounded-full border font-extrabold ${badgeColor}">${pointsText}</span>
-                                </div>
-                                <div class="text-xs text-slate-500 mt-0.5">${item.desc}</div>
-                            </div>
-                        </div>
-                        <div class="shrink-0 w-full sm:w-auto">
-                            ${inputControlsHtml}
                         </div>
                     `;
+                } else {
+                    // SBD / STT INPUT FOR INDIVIDUAL TYPE
+                    const formatted = formatSTTDisplay(itemData.sttList || []);
+                    const count = (itemData.sttList || []).length;
 
-                    listBody.appendChild(row);
-                });
+                    controlHtml = `
+                        <div class="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-700/50">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-semibold text-slate-400">Gõ STT 2 chữ số (VD: 01321305):</span>
+                                <span class="text-[11px] font-bold ${count > 0 ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.5 rounded' : 'text-slate-400'}">
+                                    Tổng: ${count} lượt
+                                </span>
+                            </div>
+                            <input type="text" value="${formatted}" placeholder="VD: 01-25-26" 
+                                onblur="onIndividualInputBlur('${week}', '${classId}', ${item.id}, this.value)"
+                                onkeyup="if(event.key==='Enter') this.blur()"
+                                class="w-full font-mono font-bold text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            <div class="flex items-center justify-between text-[10px]">
+                                <div class="flex gap-1">
+                                    <button onclick="quickAddSTT('${week}', '${classId}', ${item.id}, '25')" class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md font-semibold text-slate-600 dark:text-slate-300 active:scale-95">+25</button>
+                                    <button onclick="quickAddSTT('${week}', '${classId}', ${item.id}, '26')" class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md font-semibold text-slate-600 dark:text-slate-300 active:scale-95">+26</button>
+                                </div>
+                                <button onclick="clearSTT('${week}', '${classId}', ${item.id})" class="text-rose-500 dark:text-rose-400 font-semibold hover:underline">Xóa nhập liệu</button>
+                            </div>
+                        </div>
+                    `;
+                }
 
-                container.appendChild(groupEl);
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 w-5 h-5 rounded-full flex items-center justify-center shrink-0">${item.id}</span>
+                            <div>
+                                <h3 class="font-bold text-xs text-slate-800 dark:text-slate-100 leading-snug">${item.title}</h3>
+                                <p class="text-[10px] text-slate-400 dark:text-slate-500">${item.group}</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full border shrink-0 ${badgeClass}">${pointsStr}</span>
+                    </div>
+                    ${controlHtml}
+                `;
+
+                container.appendChild(card);
             });
+        }
+
+        function filterCriteriaList() {
+            renderCriteriaList(getSelectedWeek(), getSelectedClassId());
         }
 
         // ==========================================
         // 5. INPUT EVENT HANDLERS
         // ==========================================
 
-        function updateGroupCount(week, classId, criteriaId, delta) {
+        function changeGroupCount(week, classId, criteriaId, delta) {
             const record = getClassRecord(week, classId);
             if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
 
             let current = record[criteriaId].count || 0;
-            current = Math.max(0, current + delta);
-            record[criteriaId].count = current;
+            record[criteriaId].count = Math.max(0, current + delta);
 
-            saveStorageData();
-            changeWeekOrClass();
+            triggerAutoSave();
+            onWeekOrClassChange();
         }
 
-        function setGroupCount(week, classId, criteriaId, value) {
+        function setGroupCountDirect(week, classId, criteriaId, value) {
             const record = getClassRecord(week, classId);
             if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
 
             let val = parseInt(value, 10);
-            if (isNaN(val) || val < 0) val = 0;
+            record[criteriaId].count = isNaN(val) || val < 0 ? 0 : val;
 
-            record[criteriaId].count = val;
-
-            saveStorageData();
-            changeWeekOrClass();
+            triggerAutoSave();
+            onWeekOrClassChange();
         }
 
-        function handleIndividualInput(week, classId, criteriaId, rawValue) {
+        function onIndividualInputBlur(week, classId, criteriaId, rawValue) {
             const record = getClassRecord(week, classId);
             if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
 
-            const sttArray = parseInputToSTTArray(rawValue);
-            record[criteriaId].sttList = sttArray;
+            record[criteriaId].sttList = parseSmartSTTInput(rawValue);
 
-            saveStorageData();
-            changeWeekOrClass();
-            showToast("Đã cập nhật danh sách vi phạm cá nhân");
+            triggerAutoSave();
+            onWeekOrClassChange();
         }
 
         function quickAddSTT(week, classId, criteriaId, sttStr) {
@@ -694,253 +634,242 @@
             if (!record[criteriaId]) record[criteriaId] = { count: 0, sttList: [] };
 
             const num = parseInt(sttStr, 10);
-            if (!record[criteriaId].sttList.includes(num)) {
-                record[criteriaId].sttList.push(num);
-            }
+            record[criteriaId].sttList.push(num);
 
-            saveStorageData();
-            changeWeekOrClass();
+            triggerAutoSave();
+            onWeekOrClassChange();
             showToast(`Đã thêm STT ${sttStr}`);
         }
 
         function clearSTT(week, classId, criteriaId) {
             const record = getClassRecord(week, classId);
-            if (record[criteriaId]) {
-                record[criteriaId].sttList = [];
-            }
-            saveStorageData();
-            changeWeekOrClass();
+            if (record[criteriaId]) record[criteriaId].sttList = [];
+
+            triggerAutoSave();
+            onWeekOrClassChange();
         }
 
         function clearCurrentClassData() {
             const week = getSelectedWeek();
             const classId = getSelectedClassId();
-            if (confirm(`Bạn có chắc chắn muốn xóa toàn bộ dữ liệu chấm điểm của ${classId} trong ${week}?`)) {
+            if (confirm(`Xóa toàn bộ nhập liệu của ${classId} trong ${week}?`)) {
                 if (appData[week] && appData[week][classId]) {
                     appData[week][classId] = {};
-                    saveStorageData();
-                    changeWeekOrClass();
-                    showToast("Đã xóa dữ liệu lớp thành công!");
+                    triggerAutoSave();
+                    onWeekOrClassChange();
+                    showToast("Đã xóa dữ liệu lớp!");
                 }
             }
         }
 
         // ==========================================
-        // 6. TAB 2: SUMMARY & RANKING RENDER
+        // 6. SUMMARY & RANKING VIEW
         // ==========================================
 
-        function renderSummaryTable() {
-            const week = document.getElementById('summary-week-filter').value || getSelectedWeek();
-            document.getElementById('summary-current-week-label').textContent = week;
+        function renderSummaryView() {
+            const week = getSelectedWeek();
+            document.getElementById('summary-week-badge').textContent = week;
 
             const groupsContainer = document.getElementById('summary-groups-container');
+            const allListContainer = document.getElementById('all-classes-list');
             groupsContainer.innerHTML = '';
-
-            const allTableBody = document.getElementById('all-classes-tbody');
-            allTableBody.innerHTML = '';
-
-            // Group classes by Block
-            const blocks = ["Khối 10", "Khối 11", "Khối 12"];
+            allListContainer.innerHTML = '';
 
             let allClassRankings = [];
+            const blocks = ["Khối 10", "Khối 12"];
 
             blocks.forEach(blockName => {
                 const blockClasses = SAMPLE_CLASSES.filter(c => c.block === blockName);
+                const classScores = blockClasses.map(cls => ({
+                    ...cls,
+                    score: calculateClassScore(week, cls.id)
+                })).sort((a,b) => b.score - a.score);
 
-                // Calculate scores for each class in block
-                const classScores = blockClasses.map(cls => {
-                    const score = calculateClassScore(week, cls.id);
-                    return {
-                        ...cls,
-                        score: score
-                    };
-                });
-
-                // Sort descending by score
-                classScores.sort((a, b) => b.score - a.score);
-
-                // Assign block rank
                 classScores.forEach((item, index) => {
                     item.blockRank = index + 1;
-                    item.titleStatus = getTitleBadge(item.score);
                     allClassRankings.push(item);
                 });
 
-                // Render Block Summary Card
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden card-box flex flex-col";
-
-                let blockBg = "bg-indigo-700";
-                if (blockName === "Khối 11") blockBg = "bg-blue-700";
-                if (blockName === "Khối 12") blockBg = "bg-emerald-700";
-
-                card.innerHTML = `
-                    <div class="${blockBg} text-white p-4 font-extrabold text-base flex justify-between items-center">
-                        <span><i class="fa-solid fa-users text-yellow-300 mr-2"></i> ${blockName}</span>
-                        <span class="text-xs bg-black/20 px-2.5 py-1 rounded-full font-semibold">${classScores.length} Lớp thi đua</span>
+                // Render compact block summary card
+                const groupCard = document.createElement('div');
+                groupCard.className = "bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden";
+                groupCard.innerHTML = `
+                    <div class="bg-indigo-700 text-white px-3.5 py-2 text-xs font-extrabold flex justify-between items-center">
+                        <span><i class="fa-solid fa-users text-amber-300 mr-1.5"></i> ${blockName}</span>
+                        <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">${classScores.length} Lớp</span>
                     </div>
-                    <div class="p-4 flex-grow divide-y divide-slate-100">
+                    <div class="divide-y divide-slate-100 dark:divide-slate-700/50 p-2">
                         ${classScores.map(cls => `
-                            <div class="py-3 flex items-center justify-between">
+                            <div class="py-2 px-1 flex items-center justify-between">
                                 <div>
-                                    <div class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
-                                        ${cls.name}
-                                        <span class="text-[10px] font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">SBD ${cls.sbdPrefix}xxx</span>
-                                    </div>
-                                    <div class="text-xs text-slate-500 mt-0.5">${cls.titleStatus.label}</div>
+                                    <div class="font-bold text-xs text-slate-800 dark:text-slate-100">${cls.name}</div>
+                                    <div class="text-[10px] text-slate-400">SBD ${cls.sbdPrefix}xxx</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-lg font-black text-indigo-700">${cls.score} <span class="text-xs text-slate-400 font-normal">đ</span></div>
-                                    <div class="text-xs font-bold text-amber-600">Hạng ${cls.blockRank}</div>
+                                    <div class="text-sm font-black text-indigo-600 dark:text-indigo-400">${cls.score} đ</div>
+                                    <div class="text-[10px] font-bold text-amber-600">Hạng ${cls.blockRank}</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 `;
-
-                groupsContainer.appendChild(card);
+                groupsContainer.appendChild(groupCard);
             });
 
-            // Sort overall school rankings
-            allClassRankings.sort((a, b) => b.score - a.score);
+            // School-wide ranking
+            allClassRankings.sort((a,b) => b.score - a.score);
 
-            // Populate Overall School Table
             allClassRankings.forEach((cls, idx) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                const item = document.createElement('div');
+                item.className = "p-3 flex items-center justify-between text-xs hover:bg-slate-50 dark:hover:bg-slate-700/30 transition";
 
-                let medal = `<span class="font-bold text-slate-500">${idx + 1}</span>`;
-                if (idx === 0) medal = `<i class="fa-solid fa-medal text-yellow-500 text-base"></i>`;
-                if (idx === 1) medal = `<i class="fa-solid fa-medal text-slate-400 text-base"></i>`;
-                if (idx === 2) medal = `<i class="fa-solid fa-medal text-amber-700 text-base"></i>`;
+                let medal = `<span class="font-bold text-slate-400 w-5 text-center">${idx + 1}</span>`;
+                if (idx === 0) medal = `<i class="fa-solid fa-medal text-amber-400 text-sm w-5 text-center"></i>`;
+                if (idx === 1) medal = `<i class="fa-solid fa-medal text-slate-400 text-sm w-5 text-center"></i>`;
 
-                tr.innerHTML = `
-                    <td class="p-3.5 text-center font-bold">${medal}</td>
-                    <td class="p-3.5 font-semibold text-slate-600">${cls.block}</td>
-                    <td class="p-3.5 font-extrabold text-slate-800">${cls.name}</td>
-                    <td class="p-3.5 font-mono text-xs text-slate-500">${cls.sbdPrefix}001 - ${cls.sbdPrefix}050</td>
-                    <td class="p-3.5 text-center font-black text-indigo-700 text-base">${cls.score}</td>
-                    <td class="p-3.5 text-center font-bold text-slate-700">Hạng ${cls.blockRank}</td>
-                    <td class="p-3.5 text-center">${cls.titleStatus.badgeHtml}</td>
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        ${medal}
+                        <div>
+                            <div class="font-extrabold text-slate-800 dark:text-slate-100">${cls.name} <span class="text-[10px] text-slate-400 font-normal">(${cls.block})</span></div>
+                            <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">Hạng Khối: ${cls.blockRank}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-black text-indigo-600 dark:text-indigo-400">${cls.score} đ</span>
+                    </div>
                 `;
-
-                allTableBody.appendChild(tr);
+                allListContainer.appendChild(item);
             });
 
-            // Generate Copyable Report Text
             generateTextReport(week, allClassRankings);
         }
 
-        function getTitleBadge(score) {
-            if (score >= 95) {
-                return {
-                    label: "Xuất Sắc",
-                    badgeHtml: `<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full border border-emerald-300">★ Xuất Sắc</span>`
-                };
-            } else if (score >= 85) {
-                return {
-                    label: "Tốt",
-                    badgeHtml: `<span class="px-2.5 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full border border-blue-300">Tốt</span>`
-                };
-            } else if (score >= 70) {
-                return {
-                    label: "Khá",
-                    badgeHtml: `<span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full border border-amber-300">Khá</span>`
-                };
-            } else {
-                return {
-                    label: "Cần Cố Gắng",
-                    badgeHtml: `<span class="px-2.5 py-1 bg-rose-100 text-rose-800 font-bold text-xs rounded-full border border-rose-300">Cần Cố Gắng</span>`
-                };
-            }
-        }
-
         function generateTextReport(week, rankings) {
-            let report = `=== BÁO CÁO TỔNG KẾT THI ĐỦA ${week.toUpperCase()} ===\n\n`;
-            
-            rankings.forEach((cls) => {
-                report += `• ${cls.name} (${cls.block}): ${cls.score} điểm - Xếp Hạng Khối: ${cls.blockRank} - Danh hiệu: ${cls.titleStatus.label}\n`;
+            let txt = `=== TỔNG KẾT THI ĐỦA ${week.toUpperCase()} ===\n`;
+            rankings.forEach(cls => {
+                txt += `• ${cls.name} (${cls.block}): ${cls.score} đ - Hạng Khối: ${cls.blockRank}\n`;
             });
-
-            report += `\nNguồn: Hệ thống Chấm điểm Thi đua TKTĐ`;
-            document.getElementById('text-report-area').value = report;
+            document.getElementById('text-report-area').value = txt;
         }
 
         function copyReportText() {
             const copyText = document.getElementById("text-report-area");
             copyText.select();
             document.execCommand("copy");
-            showToast("Đã sao chép báo cáo vào bộ nhớ tạm!");
+            showToast("Đã sao chép báo cáo!");
         }
 
         // ==========================================
-        // 7. TAB NAVIGATION & UTILITIES
+        // 7. NAVIGATION & MODALS
         // ==========================================
 
         function switchTab(tabName) {
-            const inputTab = document.getElementById('tab-input');
-            const summaryTab = document.getElementById('tab-summary');
-            const guideTab = document.getElementById('tab-guide');
+            document.getElementById('tab-input').classList.add('hidden');
+            document.getElementById('tab-summary').classList.add('hidden');
+            document.getElementById('tab-guide').classList.add('hidden');
 
-            const btnInput = document.getElementById('tab-btn-input');
-            const btnSummary = document.getElementById('tab-btn-summary');
-            const btnGuide = document.getElementById('tab-btn-guide');
+            const scoreBanner = document.getElementById('score-banner');
 
-            // Reset tab button styles
-            [btnInput, btnSummary, btnGuide].forEach(btn => {
-                btn.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 text-slate-600 hover:bg-slate-100";
+            const navInput = document.getElementById('nav-btn-input');
+            const navSummary = document.getElementById('nav-btn-summary');
+            const navGuide = document.getElementById('nav-btn-guide');
+
+            [navInput, navSummary, navGuide].forEach(btn => {
+                btn.className = "flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-medium";
             });
 
-            // Hide tabs
-            inputTab.classList.add('hidden');
-            summaryTab.classList.add('hidden');
-            guideTab.classList.add('hidden');
-
             if (tabName === 'input') {
-                inputTab.classList.remove('hidden');
-                btnInput.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
+                document.getElementById('tab-input').classList.remove('hidden');
+                navInput.className = "flex flex-col items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold";
+                scoreBanner.classList.remove('hidden');
             } else if (tabName === 'summary') {
-                summaryTab.classList.remove('hidden');
-                btnSummary.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
-                renderSummaryTable();
+                document.getElementById('tab-summary').classList.remove('hidden');
+                navSummary.className = "flex flex-col items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold";
+                scoreBanner.classList.add('hidden');
+                renderSummaryView();
             } else if (tabName === 'guide') {
-                guideTab.classList.remove('hidden');
-                btnGuide.className = "px-5 py-2.5 rounded-lg font-bold text-sm transition flex items-center gap-2 bg-indigo-600 text-white shadow-md";
+                document.getElementById('tab-guide').classList.remove('hidden');
+                navGuide.className = "flex flex-col items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold";
+                scoreBanner.classList.add('hidden');
             }
         }
 
-        function resetDataPrompt() {
-            if (confirm("Bạn có chắc chắn muốn đặt lại toàn bộ dữ liệu ứng dụng về mặc định?")) {
-                localStorage.removeItem('tktd_emulation_data');
-                appData = {};
-                changeWeekOrClass();
-                showToast("Đã khôi phục dữ liệu ban đầu!");
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('tktd_dark_mode', isDark ? 'true' : 'false');
+            updateDarkModeIcon(isDark);
+        }
+
+        function loadDarkModePreference() {
+            const pref = localStorage.getItem('tktd_dark_mode');
+            if (pref === 'true' || (!pref && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateDarkModeIcon(true);
+            } else {
+                document.documentElement.classList.remove('dark');
+                updateDarkModeIcon(false);
             }
         }
+
+        function updateDarkModeIcon(isDark) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = isDark ? "fa-solid fa-sun text-amber-400" : "fa-solid fa-moon";
+        }
+
+        function openMenuModal() { document.getElementById('menu-modal').classList.remove('hidden'); }
+        function closeMenuModal() { document.getElementById('menu-modal').classList.add('hidden'); }
 
         function exportJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `TKTD_ThiDua_Data_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Đã xuất file dữ liệu thành công!");
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", `TKTD_Mobile_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast("Đã xuất file JSON!");
         }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-msg');
-            toastMsg.textContent = message;
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    appData = JSON.parse(e.target.result);
+                    triggerAutoSave();
+                    onWeekOrClassChange();
+                    closeMenuModal();
+                    showToast("Đã nhập dữ liệu thành công!");
+                } catch(err) {
+                    showToast("File JSON không hợp lệ!");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetDataPrompt() {
+            if (confirm("CẢNH BÁO: Bạn có muốn xóa toàn bộ dữ liệu ứng dụng?")) {
+                localStorage.removeItem('tktd_mobile_data');
+                appData = {};
+                onWeekOrClassChange();
+                closeMenuModal();
+                showToast("Đã đặt lại dữ liệu!");
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
 
             setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 2500);
         }
     </script>
 </body>
