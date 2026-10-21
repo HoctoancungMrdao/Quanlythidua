@@ -18,23 +18,23 @@
 
     <!-- HEADER -->
     <header class="bg-red-700 text-white sticky top-0 z-40 shadow-md">
-        <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-flag text-yellow-300 text-lg"></i>
                 <div>
                     <h1 class="font-bold text-sm md:text-base leading-tight uppercase">THCS-THPT TRẦN TRƯỜNG SINH</h1>
-                    <p class="text-[11px] text-red-100">Bảng Quản Lý Thi Đua Tuần</p>
+                    <p class="text-[11px] text-red-100">Hệ Thống Quản Lý Thi Đua & Vi Phạm Tuần</p>
                 </div>
             </div>
-            <button id="lockStatusBtn" onclick="openAdminModal()" class="px-3 py-1 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1.5 shadow">
-                <i class="fa-solid fa-lock"></i> Đã Khóa
+            <button id="lockStatusBtn" onclick="openAdminModal()" class="px-3 py-1.5 rounded bg-red-800 hover:bg-red-900 text-white text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer transition">
+                <i class="fa-solid fa-lock"></i> BTC Khóa
             </button>
         </div>
     </header>
 
-    <main class="max-w-3xl w-full mx-auto p-3 space-y-4 flex-grow">
+    <main class="max-w-4xl w-full mx-auto p-3 space-y-4 flex-grow">
 
-        <!-- 1. CHỌN TUẦN -->
+        <!-- CHỌN TUẦN -->
         <section class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-calendar-week text-red-600 text-lg"></i>
@@ -49,25 +49,35 @@
 
         <!-- BANNER KHÓA -->
         <div id="lockBanner" class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-lg text-xs text-amber-800 font-medium shadow-sm">
-            <i class="fa-solid fa-lock mr-1.5 text-amber-600"></i><strong>Hệ thống đang khóa:</strong> Cần gõ mật khẩu Admin để mở quyền nhập lỗi.
+            <i class="fa-solid fa-lock mr-1.5 text-amber-600"></i><strong>Hệ thống đang khóa:</strong> Bấm nút <b>BTC Khóa</b> góc trên và nhập mật khẩu Admin (<code class="bg-amber-100 px-1 font-bold">Khuon@247</code>) để mở quyền nhập vi phạm.
         </div>
 
-        <!-- 2. KẾT QUẢ XẾP HẠNG PHÍA TRÊN -->
+        <!-- BẢNG XẾP HẠNG THI ĐUA -->
         <section class="space-y-2">
             <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-trophy text-amber-500"></i> Bảng Xếp Hạng <span id="lblWeekRank" class="text-red-600">Tuần 05</span>
+                <i class="fa-solid fa-trophy text-amber-500"></i> Bảng Xếp Hạng Thi Đua <span id="lblWeekRank" class="text-red-600">Tuần 05</span>
             </h2>
 
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="bg-blue-700 text-white px-3 py-2 font-bold text-xs uppercase">BẢNG XẾP HẠNG TỔNG THỂ</div>
-                <div id="rankList" class="divide-y divide-slate-100"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-blue-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 1 (10A1, 10A2,...)</div>
+                    <div id="group1-list" class="divide-y divide-slate-100"></div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-emerald-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 2 (10A3,...)</div>
+                    <div id="group2-list" class="divide-y divide-slate-100"></div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="bg-purple-700 text-white px-3 py-2 font-bold text-xs uppercase">NHÓM 3 (Các lớp còn lại)</div>
+                    <div id="group3-list" class="divide-y divide-slate-100"></div>
+                </div>
             </div>
         </section>
 
-        <!-- 3. DANH SÁCH LỚP VÀ NÚT NHẬP LỖI -->
+        <!-- DANH SÁCH LỚP & SỔ DANH SÁCH BẤM XEM -->
         <section class="space-y-3 pt-2">
             <h2 class="font-bold text-xs md:text-sm text-slate-800 uppercase flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-red-600"></i> Danh Sách Lớp & Nhập Lỗi Vi Phạm
+                <i class="fa-solid fa-users text-red-600"></i> Danh Sách Học Sinh & Vi Phạm Lớp
             </h2>
 
             <div id="classListContainer" class="space-y-3"></div>
@@ -75,7 +85,7 @@
 
     </main>
 
-    <!-- MODAL NHẬP LỖI HỌC SINH -->
+    <!-- MODAL NHẬP LỖI THEO 2 SỐ CUỐI SBD -->
     <div id="inputModal" class="modal-box p-3">
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div class="bg-red-700 text-white px-4 py-3 flex items-center justify-between">
@@ -86,7 +96,7 @@
             <div class="p-4 overflow-y-auto space-y-4 flex-grow text-xs">
                 <!-- Đánh Giá Tập Thể -->
                 <div class="space-y-2">
-                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">1. Đánh Giá Tập Thể</h4>
+                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">1. Đánh Giá Tiết Học & Tập Thể</h4>
                     <div class="grid grid-cols-2 gap-2">
                         <div class="bg-slate-50 p-2 rounded border flex justify-between items-center">
                             <span>Tiết học tốt (+10)</span>
@@ -107,18 +117,18 @@
                     </div>
                 </div>
 
-                <!-- Nhập Lỗi Cá Nhân -->
+                <!-- Nhập Vi Phạm Theo 2 Số Cuối SBD -->
                 <div class="space-y-2">
-                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Mã Lỗi Cá Nhân Từng Bạn</h4>
-                    <p class="text-[11px] text-slate-500">Các mã lỗi cách nhau bởi <b>dấu gạch ngang "-"</b> (Ví dụ: <code class="bg-slate-100 px-1 font-bold text-red-600">14-15-27</code>)</p>
+                    <h4 class="font-bold text-slate-700 uppercase border-b pb-1">2. Mã Lỗi Học Sinh (Theo 2 Số Cuối SBD)</h4>
+                    <p class="text-[11px] text-slate-500">Cú pháp: <code class="bg-slate-100 px-1 font-bold text-red-600">[2 số cuối SBD]-[Mã vi phạm]</code> (Ví dụ SBD 03 dính lỗi 14 và 15: gõ <code class="bg-slate-100 px-1 font-bold text-red-600">03-14-15</code>)</p>
                     <div id="modalStudentList" class="space-y-2 max-h-[250px] overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- Phạt Trễ SĐB -->
+                <!-- Nộp Trễ Sổ Đầu Bài -->
                 <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-lg">
                     <label class="flex items-center space-x-2 cursor-pointer">
                         <input type="checkbox" id="m_inp_tre_sdb" class="w-4 h-4 text-red-600 rounded">
-                        <span class="font-bold text-rose-800">Nộp Sổ đầu bài sau 17h00 T6 (Phạt xếp cuối)</span>
+                        <span class="font-bold text-rose-800">Nộp Sổ đầu bài sau 17h00 T6 (Phạt xếp hạng cuối)</span>
                     </label>
                 </div>
             </div>
@@ -130,22 +140,22 @@
         </div>
     </div>
 
-    <!-- MODAL BẢO MẬT BTC -->
+    <!-- MODAL ĐĂNG NHẬP ADMIN -->
     <div id="adminModal" class="modal-box p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-xs w-full p-4 space-y-3">
             <div class="flex items-center justify-between border-b pb-2">
                 <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-lock text-red-600"></i> Xác Nhận BTC
+                    <i class="fa-solid fa-lock text-red-600"></i> Quản Trị BTC
                 </h3>
                 <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
             </div>
             
             <form onsubmit="handleAdminSubmit(event)" class="space-y-3">
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-slate-700">Mật khẩu Admin mở khóa:</label>
-                    <input type="password" id="adminPassInput" placeholder="Nhập Khuon@247..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-red-600">
+                    <label class="block text-xs font-bold text-slate-700">Mật khẩu mở khóa chỉnh sửa:</label>
+                    <input type="password" id="adminPassInput" placeholder="Mật khẩu Admin..." class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-red-600">
                 </div>
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition shadow">
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs transition shadow cursor-pointer">
                     Mở Khóa Chỉnh Sửa
                 </button>
             </form>
@@ -155,92 +165,216 @@
     <script>
         const ADMIN_PASS = "Khuon@247";
 
+        // DANH MỤC 39 TIÊU CHÍ THEO FILE EXCEL TKTĐ THÁNG 10 2026-2027
         const RULES = {
-            1: { text: "Không thuộc bài/điểm kém", pts: -5 },
+            1: { text: "KTB, KCB, KLBT; Điểm kém; Ghi nợ", pts: -5 },
             2: { text: "Cúp tiết học", pts: -10 },
-            3: { text: "Gian lận kiểm tra/thi", pts: -20 },
+            3: { text: "Gian lận kiểm tra, thi", pts: -20 },
+            4: { text: "Tiết học tốt", pts: 10 },
+            5: { text: "Tiết không đạt/không đăng ký", pts: -5 },
+            6: { text: "Tiết học loại B", pts: -3 },
+            7: { text: "Tiết học loại C", pts: -10 },
+            8: { text: "Tuyên dương: Điểm 8", pts: 1 },
+            9: { text: "Tuyên dương: Điểm 9", pts: 2 },
+            10: { text: "Tuyên dương: Điểm 10", pts: 3 },
             11: { text: "Vắng có phép", pts: -1 },
             12: { text: "Vắng không phép", pts: -5 },
             13: { text: "Đến lớp trễ", pts: -5 },
-            14: { text: "Mất trật tự trong giờ", pts: -5 },
-            15: { text: "Sai đồng phục/phù hiệu", pts: -5 },
-            16: { text: "Tô son/sơn móng", pts: -10 },
-            17: { text: "Lớp ồn/không nghiêm túc", pts: -20 },
+            14: { text: "Mất trật tự, làm việc riêng trong giờ", pts: -5 },
+            15: { text: "Sai đồng phục, phù hiệu, dây nịt", pts: -5 },
+            16: { text: "Tô son, đánh phấn, sơn móng", pts: -10 },
+            17: { text: "Lớp ồn; Không nghiêm túc khi KT", pts: -20 },
             18: { text: "Để xe sai quy định", pts: -20 },
             19: { text: "Cư xử thiếu văn hóa", pts: -20 },
-            20: { text: "Ăn mặc phản cảm/nhuộm tóc", pts: -20 },
-            22: { text: "Cúp chào cờ", pts: -20 },
-            23: { text: "Vô lễ thầy cô", pts: -20 },
+            20: { text: "Ăn mặc phản cảm, nhuộm tóc, xăm hình", pts: -20 },
+            21: { text: "Không hợp tác với Cờ đỏ", pts: -20 },
+            22: { text: "Cúp tiết chào cờ", pts: -20 },
+            23: { text: "Vô lễ thầy cô, người lớn tuổi", pts: -20 },
             24: { text: "Dùng ĐTDĐ sai quy định", pts: -20 },
-            25: { text: "Vi phạm ATGT/Trật tự", pts: -30 },
-            26: { text: "Thiếu khăn lau/bình hoa", pts: -10 },
-            27: { text: "Vệ sinh lớp không sạch", pts: -10 },
+            25: { text: "Vi phạm ATGT - Trật tự xã hội", pts: -30 },
+            26: { text: "Thiếu khăn trải bàn, bình hoa, khăn lau", pts: -10 },
+            27: { text: "Vệ sinh lớp không sạch, rác ngăn bàn", pts: -10 },
             28: { text: "Không lau bảng", pts: -10 },
-            29: { text: "Mang thức ăn/hộp xốp", pts: -20 },
-            30: { text: "Phá hoại tài sản/vẽ bẩn", pts: -20 }
+            29: { text: "Mang thức ăn, hộp xốp, ly nhựa vào lớp", pts: -20 },
+            30: { text: "Phá hoại tài sản, viết vẽ bẩn", pts: -20 },
+            31: { text: "Trực vệ sinh không tốt", pts: -20 },
+            32: { text: "Bỏ trực vệ sinh", pts: -30 },
+            33: { text: "Không tắt đèn quạt / để ghế sai chỗ", pts: -30 },
+            34: { text: "Trực SHDC chuẩn bị không tốt", pts: -20 },
+            35: { text: "Bị nhắc nhở / không trực SHDC", pts: -30 },
+            36: { text: "Không mang đầy đủ dụng cụ lao động", pts: -20 },
+            37: { text: "Không tham gia lao động trường", pts: -30 },
+            38: { text: "Phong trào: Tham gia >= 50% sĩ số", pts: 30 },
+            39: { text: "Phong trào: Tham gia < 50% sĩ số", pts: -30 }
         };
 
-        const SAMPLE_CLASSES = ["10A1", "10A2", "10A3"];
+        const GROUPS = {
+            1: ["10A1", "10A2"],
+            2: ["10A3"],
+            3: []
+        };
 
         const CLASS_STUDENTS = {
             "10A1": [
-                "Từ Liêu Quốc An", "Nguyễn Quốc Anh", "Trần Gia Bảo", "Nguyễn Lê Thùy Dương", "Phan Trần Phúc Đạt",
-                "Bùi Trần Hoàng Giang", "Nguyễn Thị Ngọc Hân", "Hà Huy Hoàng", "Nguyễn Nhựt Huy", "Lê Nguyễn Gia Hưng",
-                "Phạm Nhật Khang", "Phạm Huỳnh Như Khánh", "Nguyễn Trần Yến Lam", "Bùi Thị Thùy Lan", "Đỗ Pha Lê",
-                "Phan Thành Lợi", "Bùi Thị Trà My", "Nguyễn Thị Bảo Ngân", "Nguyễn Thị Thảo Ngân", "Nguyễn Gia Nghi",
-                "Nguyễn Khánh Ngọc", "Võ Thị Khánh Ngọc", "Nguyễn Thị Thảo Nguyên", "Tống Hoài Nhân", "Hồ Phúc Nhân",
-                "Lê Ngọc Như", "Nguyễn Tấn Phát", "Nguyễn Ngọc Bảo Quân", "Phan Đỗ Quyên", "Lê Hoàng Sang",
-                "Hồ Thị Mỹ Tâm", "Võ Diễm Thi", "Phạm Thị Kim Thùy", "Nguyễn Ngọc Anh Thư", "Hồ Ngọc Bảo Trâm",
-                "Nguyễn Trần Huyền Trân", "Đỗ Duy Tường", "Lê Vĩnh Tường", "Phan Như Uyên", "Hồ Quốc Việt",
-                "Võ Thị Kha Vy", "Bùi Minh Vy", "Phan Thị Lan Vy", "Nguyễn Trần Như Ý", "Đào Phi Yến"
+                { sbd: "101001", hoTen: "Từ Liêu Quốc An" },
+                { sbd: "101002", hoTen: "Nguyễn Quốc Anh" },
+                { sbd: "101003", hoTen: "Trần Gia Bảo" },
+                { sbd: "101004", hoTen: "Nguyễn Lê Thùy Dương" },
+                { sbd: "101005", hoTen: "Phan Trần Phúc Đạt" },
+                { sbd: "101006", hoTen: "Bùi Trần Hoàng Giang" },
+                { sbd: "101007", hoTen: "Nguyễn Thị Ngọc Hân" },
+                { sbd: "101008", hoTen: "Hà Huy Hoàng" },
+                { sbd: "101009", hoTen: "Nguyễn Nhựt Huy" },
+                { sbd: "101010", hoTen: "Lê Nguyễn Gia Hưng" },
+                { sbd: "101011", hoTen: "Phạm Nhật Khang" },
+                { sbd: "101012", hoTen: "Phạm Huỳnh Như Khánh" },
+                { sbd: "101013", hoTen: "Nguyễn Trần Yến Lam" },
+                { sbd: "101014", hoTen: "Bùi Thị Thùy Lan" },
+                { sbd: "101015", hoTen: "Đỗ Pha Lê" },
+                { sbd: "101016", hoTen: "Phan Thành Lợi" },
+                { sbd: "101017", hoTen: "Bùi Thị Trà My" },
+                { sbd: "101018", hoTen: "Nguyễn Thị Bảo Ngân" },
+                { sbd: "101019", hoTen: "Nguyễn Thị Thảo Ngân" },
+                { sbd: "101020", hoTen: "Nguyễn Gia Nghi" },
+                { sbd: "101021", hoTen: "Nguyễn Khánh Ngọc" },
+                { sbd: "101022", hoTen: "Võ Thị Khánh Ngọc" },
+                { sbd: "101023", hoTen: "Nguyễn Thị Thảo Nguyên" },
+                { sbd: "101024", hoTen: "Tống Hoài Nhân" },
+                { sbd: "101025", hoTen: "Hồ Phúc Nhân" },
+                { sbd: "101026", hoTen: "Lê Ngọc Như" },
+                { sbd: "101027", hoTen: "Nguyễn Tấn Phát" },
+                { sbd: "101028", hoTen: "Nguyễn Ngọc Bảo Quân" },
+                { sbd: "101029", hoTen: "Phan Đỗ Quyên" },
+                { sbd: "101030", hoTen: "Lê Hoàng Sang" },
+                { sbd: "101031", hoTen: "Hồ Thị Mỹ Tâm" },
+                { sbd: "101032", hoTen: "Võ Diễm Thi" },
+                { sbd: "101033", hoTen: "Phạm Thị Kim Thùy" },
+                { sbd: "101034", hoTen: "Nguyễn Ngọc Anh Thư" },
+                { sbd: "101035", hoTen: "Hồ Ngọc Bảo Trâm" },
+                { sbd: "101036", hoTen: "Nguyễn Trần Huyền Trân" },
+                { sbd: "101037", hoTen: "Đỗ Duy Tường" },
+                { sbd: "101038", hoTen: "Lê Vĩnh Tường" },
+                { sbd: "101039", hoTen: "Phan Như Uyên" },
+                { sbd: "101040", hoTen: "Hồ Quốc Việt" },
+                { sbd: "101041", hoTen: "Võ Thị Kha Vy" },
+                { sbd: "101042", hoTen: "Bùi Minh Vy" },
+                { sbd: "101043", hoTen: "Phan Thị Lan Vy" },
+                { sbd: "101044", hoTen: "Nguyễn Trần Như Ý" },
+                { sbd: "101045", hoTen: "Đào Phi Yến" }
             ],
             "10A2": [
-                "Nguyễn Huỳnh Cẩm Duyên", "Võ Quốc Hào", "Nguyễn Văn Đại Hênh", "Lê Dương Kiến Hoa", "Ka Huê",
-                "Đặng Nhật Huy", "Hồ Huỳnh Nhựt Huy", "Nguyễn Quốc Huy", "Triệu Hoàng Linh", "Nguyễn Phú Lộc",
-                "Mai Phát Lộc", "Nguyễn Phú Lợi", "Tống Phước Mạnh", "Nguyễn Ái My", "Quang Thị Thúy Ngân",
-                "Đặng Hữu Nghĩa", "Phạm Thị Bảo Ngọc", "Phạm Thị Khánh Ngọc", "Huỳnh Thị Thúy Nguyên", "Phan Hoàng Nhân",
-                "Nguyễn Trí Nhân", "Lê Phương Nhi", "Trần Huỳnh Hoàng Phi", "Mai Trọng Phúc", "Bùi Mai Quyên",
-                "Ngô Thành Tài", "Đoàn Gia Tâm", "Nguyễn Chí Thiện", "Huỳnh Thơ", "Võ Phương Thùy",
-                "Nguyễn Minh Thùy", "Phạm Thị Minh Thư", "Nguyễn Anh Thư", "Huỳnh Thị Anh Thư", "Mai Trần Hạ Thy",
-                "Nguyễn Thị Ngọc Trầm", "Nguyễn Phú Trọng", "Nguyễn Thị Ngọc Truyết", "Nguyễn Thị Cẩm Tú", "Phạm Thị Mộng Tuyền",
-                "Tăng Hà Vi", "Tống Triệu Vĩ", "Ngô Ngọc Vy", "Bùi Thị Tường Vy", "Lê Nguyễn Hà Vy",
-                "Trần Thị Tường Vy", "Hồ Ngọc Yến"
+                { sbd: "102001", hoTen: "Nguyễn Huỳnh Cẩm Duyên" },
+                { sbd: "102002", hoTen: "Võ Quốc Hào" },
+                { sbd: "102003", hoTen: "Nguyễn Văn Đại Hênh" },
+                { sbd: "102004", hoTen: "Lê Dương Kiến Hoa" },
+                { sbd: "102005", hoTen: "Ka Huê" },
+                { sbd: "102006", hoTen: "Đặng Nhật Huy" },
+                { sbd: "102007", hoTen: "Hồ Huỳnh Nhựt Huy" },
+                { sbd: "102008", hoTen: "Nguyễn Quốc Huy" },
+                { sbd: "102009", hoTen: "Triệu Hoàng Linh" },
+                { sbd: "102010", hoTen: "Nguyễn Phú Lộc" },
+                { sbd: "102011", hoTen: "Mai Phát Lộc" },
+                { sbd: "102012", hoTen: "Nguyễn Phú Lợi" },
+                { sbd: "102013", hoTen: "Tống Phước Mạnh" },
+                { sbd: "102014", hoTen: "Nguyễn Ái My" },
+                { sbd: "102015", hoTen: "Quang Thị Thúy Ngân" },
+                { sbd: "102016", hoTen: "Đặng Hữu Nghĩa" },
+                { sbd: "102017", hoTen: "Phạm Thị Bảo Ngọc" },
+                { sbd: "102018", hoTen: "Phạm Thị Khánh Ngọc" },
+                { sbd: "102019", hoTen: "Huỳnh Thị Thúy Nguyên" },
+                { sbd: "102020", hoTen: "Phan Hoàng Nhân" },
+                { sbd: "102021", hoTen: "Nguyễn Trí Nhân" },
+                { sbd: "102022", hoTen: "Lê Phương Nhi" },
+                { sbd: "102023", hoTen: "Trần Huỳnh Hoàng Phi" },
+                { sbd: "102024", hoTen: "Mai Trọng Phúc" },
+                { sbd: "102025", hoTen: "Bùi Mai Quyên" },
+                { sbd: "102026", hoTen: "Ngô Thành Tài" },
+                { sbd: "102027", hoTen: "Đoàn Gia Tâm" },
+                { sbd: "102028", hoTen: "Nguyễn Chí Thiện" },
+                { sbd: "102029", hoTen: "Huỳnh Thơ" },
+                { sbd: "102030", hoTen: "Võ Phương Thùy" },
+                { sbd: "102031", hoTen: "Nguyễn Minh Thùy" },
+                { sbd: "102032", hoTen: "Phạm Thị Minh Thư" },
+                { sbd: "102033", hoTen: "Nguyễn Anh Thư" },
+                { sbd: "102034", hoTen: "Huỳnh Thị Anh Thư" },
+                { sbd: "102035", hoTen: "Mai Trần Hạ Thy" },
+                { sbd: "102036", hoTen: "Nguyễn Thị Ngọc Trầm" },
+                { sbd: "102037", hoTen: "Nguyễn Phú Trọng" },
+                { sbd: "102038", hoTen: "Nguyễn Thị Ngọc Truyết" },
+                { sbd: "102039", hoTen: "Nguyễn Thị Cẩm Tú" },
+                { sbd: "102040", hoTen: "Phạm Thị Mộng Tuyền" },
+                { sbd: "102041", hoTen: "Tăng Hà Vi" },
+                { sbd: "102042", hoTen: "Tống Triệu Vĩ" },
+                { sbd: "102043", hoTen: "Ngô Ngọc Vy" },
+                { sbd: "102044", hoTen: "Bùi Thị Tường Vy" },
+                { sbd: "102045", hoTen: "Lê Nguyễn Hà Vy" },
+                { sbd: "102046", hoTen: "Trần Thị Tường Vy" },
+                { sbd: "102047", hoTen: "Hồ Ngọc Yến" }
             ],
             "10A3": [
-                "Hồ Huỳnh Anh", "Đặng Hoàng Duy", "Phạm Thị Phương Hạ", "Đặng Nhật Hào", "Trần Thị Ngọc Hân",
-                "Phạm Thị Tú Hân", "Tống Nghi Hân", "Ngô Thị Gia Hân", "Phan Nguyễn Tuấn Huy", "Lưu Hoàng Nhật Huy",
-                "Trần Trọng Khang", "Lưu Văn Khuyến", "Phạm Vĩnh Kỳ", "Phạm Thị Tuyết Lê", "Võ Minh Lộc",
-                "Lê Văn Lộc", "Nguyễn Thị Diễm My", "Phạm Thị Trà My", "Nguyễn Bảo Ngân", "Nguyễn Hồ Uyên Yến Ngọc",
-                "Huỳnh Thị Khánh Ngọc", "Trần Hữu Nhân", "Nguyễn Hữu Nhân", "Ngô Thị Yến Nhi", "Nguyễn Thị Tuyết Như",
-                "Huỳnh Trung Nhựt", "Ngô Tấn Phát", "Phạm Minh Phát", "Đồng Nam Phương", "Mai Thị Cẩm Quyên",
-                "Trần Minh Tâm", "Huỳnh Thị Thu Tâm", "Lê Nhật Tân", "Lê Khánh Thi", "Nguyễn Thị Như Thì",
-                "Huỳnh Nhựt Thiên", "Lê Thị Hoài Thương", "Phạm Minh Toàn", "Lê Nguyễn Hương Trà", "Nguyễn Gia Tuệ",
-                "Trương Thiên Tường", "Phạm Thế Vinh", "Ngô Thị Tường Vy", "Chế Trần Tường Vy", "Nguyễn Lê Thảo Vy",
-                "Huỳnh Thị Như Ý", "Võ Thị Mỹ Huyền"
+                { sbd: "103001", hoTen: "Hồ Huỳnh Anh" },
+                { sbd: "103002", hoTen: "Đặng Hoàng Duy" },
+                { sbd: "103003", hoTen: "Phạm Thị Phương Hạ" },
+                { sbd: "103004", hoTen: "Đặng Nhật Hào" },
+                { sbd: "103005", hoTen: "Trần Thị Ngọc Hân" },
+                { sbd: "103006", hoTen: "Phạm Thị Tú Hân" },
+                { sbd: "103007", hoTen: "Tống Nghi Hân" },
+                { sbd: "103008", hoTen: "Ngô Thị Gia Hân" },
+                { sbd: "103009", hoTen: "Phan Nguyễn Tuấn Huy" },
+                { sbd: "103010", hoTen: "Lưu Hoàng Nhật Huy" },
+                { sbd: "103011", hoTen: "Trần Trọng Khang" },
+                { sbd: "103012", hoTen: "Lưu Văn Khuyến" },
+                { sbd: "103013", hoTen: "Phạm Vĩnh Kỳ" },
+                { sbd: "103014", hoTen: "Phạm Thị Tuyết Lê" },
+                { sbd: "103015", hoTen: "Võ Minh Lộc" },
+                { sbd: "103016", hoTen: "Lê Văn Lộc" },
+                { sbd: "103017", hoTen: "Nguyễn Thị Diễm My" },
+                { sbd: "103018", hoTen: "Phạm Thị Trà My" },
+                { sbd: "103019", hoTen: "Nguyễn Bảo Ngân" },
+                { sbd: "103020", hoTen: "Nguyễn Hồ Uyên Yến Ngọc" },
+                { sbd: "103021", hoTen: "Huỳnh Thị Khánh Ngọc" },
+                { sbd: "103022", hoTen: "Trần Hữu Nhân" },
+                { sbd: "103023", hoTen: "Nguyễn Hữu Nhân" },
+                { sbd: "103024", hoTen: "Ngô Thị Yến Nhi" },
+                { sbd: "103025", hoTen: "Nguyễn Thị Tuyết Như" },
+                { sbd: "103026", hoTen: "Huỳnh Trung Nhựt" },
+                { sbd: "103027", hoTen: "Ngô Tấn Phát" },
+                { sbd: "103028", hoTen: "Phạm Minh Phát" },
+                { sbd: "103029", hoTen: "Đồng Nam Phương" },
+                { sbd: "103030", hoTen: "Mai Thị Cẩm Quyên" },
+                { sbd: "103031", hoTen: "Trần Minh Tâm" },
+                { sbd: "103032", hoTen: "Huỳnh Thị Thu Tâm" },
+                { sbd: "103033", hoTen: "Lê Nhật Tân" },
+                { sbd: "103034", hoTen: "Lê Khánh Thi" },
+                { sbd: "103035", hoTen: "Nguyễn Thị Như Thì" },
+                { sbd: "103036", hoTen: "Huỳnh Nhựt Thiên" },
+                { sbd: "103037", hoTen: "Lê Thị Hoài Thương" },
+                { sbd: "103038", hoTen: "Phạm Minh Toàn" },
+                { sbd: "103039", hoTen: "Lê Nguyễn Hương Trà" },
+                { sbd: "103040", hoTen: "Nguyễn Gia Tuệ" },
+                { sbd: "103041", hoTen: "Trương Thiên Tường" },
+                { sbd: "103042", hoTen: "Phạm Thế Vinh" },
+                { sbd: "103043", hoTen: "Ngô Thị Tường Vy" },
+                { sbd: "103044", hoTen: "Chế Trần Tường Vy" },
+                { sbd: "103045", hoTen: "Nguyễn Lê Thảo Vy" },
+                { sbd: "103046", hoTen: "Huỳnh Thị Như Ý" },
+                { sbd: "103047", hoTen: "Võ Thị Mỹ Huyền" }
             ]
         };
 
         let currentActiveEditClass = null;
         let isUnlocked = false;
 
-        // XÓA HẾT MỌI LỖI MẪU CŨ, KHỞI TẠO DỮ LIỆU TRỐNG
         let appState = {
             currentWeek: "Tuần 05",
             data: {}
         };
 
         window.onload = function() {
-            const saved = localStorage.getItem('TTS_CLEAN_V5');
-            if (saved) {
-                try { appState = JSON.parse(saved); } catch(e) {}
-            }
-            document.getElementById('weekSelect').value = appState.currentWeek || "Tuần 05";
+            localStorage.clear();
+            document.getElementById('weekSelect').value = "Tuần 05";
             renderAll();
         };
-
-        function saveState() {
-            localStorage.setItem('TTS_CLEAN_V5', JSON.stringify(appState));
-        }
 
         function changeWeek() {
             appState.currentWeek = document.getElementById('weekSelect').value;
@@ -249,13 +383,12 @@
 
         function renderAll() {
             document.getElementById('lblWeekRank').innerText = appState.currentWeek;
-            document.getElementById('lockStatusBtn').innerHTML = isUnlocked ? '<i class="fa-solid fa-lock-open"></i> Đã Mở Khóa' : '<i class="fa-solid fa-lock"></i> Đã Khóa';
+            document.getElementById('lockStatusBtn').innerHTML = isUnlocked ? '<i class="fa-solid fa-lock-open"></i> Đã Mở Khóa' : '<i class="fa-solid fa-lock"></i> BTC Khóa';
             document.getElementById('lockBanner').style.display = isUnlocked ? 'none' : 'block';
             renderRankings();
             renderClassListWithViolations();
         }
 
-        // BÁM SÁT CÁCH TÁC PHÂN TÁCH BẰNG DẤU GẠCH NGANG "-"
         function calculateClassScore(clsData) {
             if (!clsData) return 100;
             let score = 100;
@@ -280,34 +413,42 @@
         function renderRankings() {
             const weekData = appState.data[appState.currentWeek] || {};
 
-            let list = SAMPLE_CLASSES.map(cls => {
-                const info = weekData[cls] || { score: 100, late: false };
-                const score = calculateClassScore(info);
-                const isPenalized = score < 0 || info.late;
-                return { cls, score, late: info.late, isPenalized };
-            });
+            [1, 2, 3].forEach(g => {
+                let list = (GROUPS[g] || []).map(cls => {
+                    const info = weekData[cls] || { score: 100, late: false };
+                    const score = calculateClassScore(info);
+                    const isPenalized = score < 0 || info.late;
+                    return { cls, score, late: info.late, isPenalized };
+                });
 
-            list.sort((a, b) => {
-                if (a.isPenalized && !b.isPenalized) return 1;
-                if (!a.isPenalized && b.isPenalized) return -1;
-                return b.score - a.score;
-            });
+                list.sort((a, b) => {
+                    if (a.isPenalized && !b.isPenalized) return 1;
+                    if (!a.isPenalized && b.isPenalized) return -1;
+                    return b.score - a.score;
+                });
 
-            const container = document.getElementById('rankList');
-            container.innerHTML = list.map((item, idx) => `
-                <div class="px-3 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50">
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold text-slate-400 w-4">${idx + 1}</span>
-                        <span class="font-bold text-slate-800">Lớp ${item.cls}</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="font-bold ${item.score < 0 ? 'text-red-600' : 'text-blue-700'}">${item.score} điểm</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.isPenalized ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
-                            ${item.late ? 'Trễ SĐB' : item.score < 0 ? 'Điểm Âm' : `Hạng ${idx + 1}`}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
+                const container = document.getElementById(`group${g}-list`);
+                if (container) {
+                    if (list.length === 0) {
+                        container.innerHTML = '<div class="p-3 text-xs text-slate-400 italic text-center">Chưa có lớp nhóm này</div>';
+                    } else {
+                        container.innerHTML = list.map((item, idx) => `
+                            <div class="px-3 py-2 flex items-center justify-between text-xs hover:bg-slate-50">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold text-slate-400 w-4">${idx + 1}</span>
+                                    <span class="font-bold text-slate-800">Lớp ${item.cls}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold ${item.score < 0 ? 'text-red-600' : 'text-blue-700'}">${item.score} đ</span>
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${item.isPenalized ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">
+                                        ${item.late ? 'Trễ SĐB' : item.score < 0 ? 'Điểm Âm' : `Hạng ${idx + 1}`}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            });
         }
 
         function toggleStudentList(cls) {
@@ -329,30 +470,37 @@
             const weekData = appState.data[appState.currentWeek] || {};
             let html = '';
 
-            SAMPLE_CLASSES.forEach(cls => {
+            const allActiveClasses = ["10A1", "10A2", "10A3"];
+
+            allActiveClasses.forEach(cls => {
                 const clsInfo = weekData[cls] || { tiet_tot: 0, tiet_b: 0, tiet_c: 0, tiet_kd: 0, late: false, violations: {} };
                 const score = calculateClassScore(clsInfo);
                 const students = CLASS_STUDENTS[cls] || [];
                 const violationsMap = clsInfo.violations || {};
 
                 let studentListHTML = '';
-                let hasAnyViolationInClass = false;
 
-                students.forEach((st, idx) => {
-                    const codes = violationsMap[st];
+                students.forEach((stObj) => {
+                    const stSBD = stObj.sbd;
+                    const stName = stObj.hoTen;
+                    const twoDigits = stSBD.slice(-2); // Lấy 2 số cuối SBD
+
+                    const codes = violationsMap[stSBD] || violationsMap[stName];
                     let violationBadge = '';
 
                     if (codes && typeof codes === 'string' && codes.trim() !== '') {
-                        hasAnyViolationInClass = true;
                         violationBadge = codes.trim().split(/-+/).map(c => {
                             c = c.trim();
-                            return RULES[c] ? `<span class="bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded text-[10px] ml-1">[Mã ${c}] ${RULES[c].text} (${RULES[c].pts}đ)</span>` : `<span class="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-[10px] ml-1">[Mã ${c}]</span>`;
+                            return RULES[c] ? `<span class="bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded text-[10px] ml-1">[Mã ${c}] ${RULES[c].text} (${RULES[c].pts > 0 ? '+' : ''}${RULES[c].pts}đ)</span>` : `<span class="bg-slate-100 text-slate-600 px-1 py-0.5 rounded text-[10px] ml-1">[Mã ${c}]</span>`;
                         }).join(' ');
                     }
 
                     studentListHTML += `
                         <div class="flex items-center justify-between py-1.5 px-2 border-b border-slate-100 text-xs hover:bg-slate-100">
-                            <span class="text-slate-700 font-medium">${idx + 1}. ${st}</span>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-slate-400 text-[11px] bg-slate-200 px-1.5 py-0.5 rounded">${twoDigits}</span>
+                                <span class="text-slate-700 font-medium">${stName}</span>
+                            </div>
                             <div>${violationBadge ? violationBadge : '<span class="text-emerald-600 text-[11px]"><i class="fa-solid fa-check"></i> Tốt</span>'}</div>
                         </div>
                     `;
@@ -385,7 +533,7 @@
 
         function openInputModal(cls) {
             if (!isUnlocked) {
-                alert("Hệ thống đang khóa! Vui lòng nhập mật khẩu Admin để mở khóa.");
+                alert("Hệ thống đang khóa! Vui lòng bấm BTC Khóa góc trên để mở quyền chỉnh sửa.");
                 openAdminModal();
                 return;
             }
@@ -405,15 +553,19 @@
             const students = CLASS_STUDENTS[cls] || [];
             const container = document.getElementById('modalStudentList');
 
-            container.innerHTML = students.map((st, i) => {
-                const val = (clsInfo.violations && clsInfo.violations[st]) ? clsInfo.violations[st] : '';
+            container.innerHTML = students.map((stObj, i) => {
+                const stSBD = stObj.sbd;
+                const twoDigits = stSBD.slice(-2);
+                const stName = stObj.hoTen;
+                const val = (clsInfo.violations && clsInfo.violations[stSBD]) ? clsInfo.violations[stSBD] : '';
+
                 return `
                     <div class="p-2 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
                         <div class="flex justify-between items-center text-xs">
-                            <span class="font-bold text-slate-700">${st}</span>
+                            <span class="font-bold text-slate-700"><span class="bg-red-100 text-red-700 px-1 py-0.5 rounded mr-1">${twoDigits}</span>${stName}</span>
                             <span id="m_st_desc_${i}" class="text-[10px] text-red-600 font-medium italic"></span>
                         </div>
-                        <input type="text" id="m_st_code_${i}" value="${val}" oninput="parseModalStudentCode(${i})" placeholder="Ví dụ: 14-15-27" class="w-full border rounded px-2 py-1 text-xs font-bold uppercase text-slate-800">
+                        <input type="text" id="m_st_code_${i}" data-sbd="${stSBD}" value="${val}" oninput="parseModalStudentCode(${i})" placeholder="Ví dụ: 14-15-27" class="w-full border rounded px-2 py-1 text-xs font-bold uppercase text-slate-800 focus:outline-none focus:border-red-500">
                     </div>
                 `;
             }).join('');
@@ -422,7 +574,6 @@
             document.getElementById('inputModal').style.display = 'flex';
         }
 
-        // TÁCH MÃ BẰNG DẤU GẠCH NGANG "-"
         function parseModalStudentCode(index) {
             const el = document.getElementById(`m_st_code_${index}`);
             if (!el) return;
@@ -452,11 +603,11 @@
             const students = CLASS_STUDENTS[cls] || [];
             let violationsMap = {};
 
-            students.forEach((st, i) => {
+            students.forEach((stObj, i) => {
                 const inputEl = document.getElementById(`m_st_code_${i}`);
                 if (inputEl) {
                     const val = inputEl.value.trim();
-                    if (val) violationsMap[st] = val;
+                    if (val) violationsMap[stObj.sbd] = val;
                 }
             });
 
@@ -469,7 +620,6 @@
                 violations: violationsMap
             };
 
-            saveState();
             renderAll();
             closeInputModal();
             alert(`Đã lưu dữ liệu Lớp ${cls} thành công!`);
